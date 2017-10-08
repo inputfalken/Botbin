@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC***REMOVED***") = "Botbin", "Botbin\Botbin.csproj", "{EACC30B0-4478-41D6-BE78-8CBFA9FF511D***REMOVED***"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Botbin", "Botbin\Botbin.csproj", "{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D***REMOVED***.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D***REMOVED***.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D***REMOVED***.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D***REMOVED***.Release|Any CPU.Build.0 = Release|Any CPU
+		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {FD615C72-7EC8-4A41-8CB8-9DFF7ACECC43***REMOVED***
+		SolutionGuid = {FD615C72-7EC8-4A41-8CB8-9DFF7ACECC43}
 	EndGlobalSection
 EndGlobal

@@ -1,16 +1,14 @@
-***REMOVED***
-***REMOVED***
-***REMOVED***
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Newtonsoft.Json;
 
-***REMOVED***
+namespace Botbin {
     public class InfoModule : ModuleBase<SocketCommandContext> {
         private static readonly string GiphyKey =
             Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Machine);
 
-***REMOVED***
+        private readonly Giphy _giphy = new Giphy(GiphyKey);
 
         [Command("say")]
         [Summary("Echos a message.")]
@@ -23,39 +21,31 @@ using Newtonsoft.Json;
             var daysOfExistance = Math.Abs((Context.User.CreatedAt - DateTimeOffset.Now).Days);
 
             await Context.Channel.SendMessageAsync(
-                $"Your account is {daysOfExistance***REMOVED*** {(daysOfExistance == 1 ? "day" : "days")***REMOVED*** old.");
-    ***REMOVED***
+                $"Your account is {daysOfExistance} {(daysOfExistance == 1 ? "day" : "days")} old.");
+        }
 
         [Command("wtf")]
-        [Summary("Display a random GIF based on the message")]
+        [Summary("Display a random GIF based on a search term")]
         public async Task WtfAsync([Remainder] string message) {
-            var randomGifRequest =
-                $"https://api.giphy.com/v1/gifs/random?api_key={GiphyKey***REMOVED***&tag={message***REMOVED***&rating=R";
-            var response = await _client.GetStringAsync(randomGifRequest);
-
             try {
-                await Context.Channel.SendMessageAsync(GetGiphyUrlFromResponse(response));
-        ***REMOVED***
+                var link = (await _giphy.Search(message)).AbsoluteUri;
+                await Context.Channel.SendMessageAsync(link);
+            }
             catch (Exception e) {
                 await Program.Log(new LogMessage(LogSeverity.Error, "Method WtfAsync",
                     "Failed to deserialize an anonymous type", e));
                 var errorResponse =
-                    $"Oops, could not find a GIF for '{message***REMOVED***', try again with a different string.";
+                    $"Oops, could not find a GIF for '{message}', try again with a different string.";
                 await Context.Channel.SendMessageAsync(errorResponse);
-        ***REMOVED***
-    ***REMOVED***
+            }
+        }
 
         [Command("wtf")]
         [Summary("Display a random GIF")]
         public async Task WtfAsync() {
-            var randomEndPoint =
-                $"https://api.giphy.com/v1/gifs/random?api_key={GiphyKey***REMOVED***&tag=&rating=R";
-            var response = await _client.GetStringAsync(randomEndPoint);
+            var link = (await _giphy.Random()).AbsoluteUri;
 
-            await Context.Channel.SendMessageAsync(GetGiphyUrlFromResponse(response));
-    ***REMOVED***
-
-        private static string GetGiphyUrlFromResponse(string response) =>
-            JsonConvert.DeserializeAnonymousType(response, new {data = new {url = string.Empty***REMOVED******REMOVED***).data.url;
-***REMOVED***
-***REMOVED***
+            await Context.Channel.SendMessageAsync(link);
+        }
+    }
+}

@@ -1,12 +1,12 @@
-***REMOVED***
+﻿using System;
 using System.Reflection;
-***REMOVED***
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-***REMOVED***
+namespace Botbin {
     internal static class Program {
         private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(new CommandService())
@@ -27,7 +27,7 @@ using Microsoft.Extensions.DependencyInjection;
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
-    ***REMOVED***
+        }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {
             var commands = Services.GetService<CommandService>();
@@ -46,11 +46,11 @@ using Microsoft.Extensions.DependencyInjection;
             var result = await commands.ExecuteAsync(context, argPos, Services);
             if (!result.IsSuccess)
                 await context.Channel.SendMessageAsync(result.ErrorReason);
-    ***REMOVED***
+        }
 
         public static Task Log(LogMessage msg) {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
-    ***REMOVED***
-***REMOVED***
-***REMOVED***
+        }
+    }
+}
