@@ -11,14 +11,14 @@ namespace Botbin {
 
         public Giphy(string key) => _key = key;
 
-        public async Task<Uri> RandomWithTag(string tag) =>
-            await RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag={tag}&rating=R"));
+        public Task<Uri> RandomWithTag(string tag) =>
+            RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag={tag}&rating=R"));
 
-        public async Task<Uri> Random() =>
-            await RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag=&rating=R"));
+        public Task<Uri> Random() =>
+            RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag=&rating=R"));
 
-        public async Task<Uri> Search(string term) =>
-            await RequestGif(new Uri(_baseUri,
+        public Task<Uri> Search(string term) =>
+            RequestGif(new Uri(_baseUri,
                 $"/v1/gifs/translate?api_key={_key}&s={term}"));
 
         private async Task<Uri> RequestGif(Uri uri) => new Uri(
