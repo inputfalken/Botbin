@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Botbin.GameTracking.Implementations;
+using Botbin.GameTracking;
 using Botbin.GameTracking.UserEvent.Enums;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -12,7 +12,10 @@ namespace Botbin.CommandCenters {
         [Summary("Retrieves the  game history of the user.")]
         public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketUser user = null) {
             var userInfo = user ?? Context.Client.CurrentUser;
-            var userEvents = Program.Services.GetService<GameTracker>().UserEventsById(userInfo.Id).ToArray();
+            var userEvents = Program.Services
+                .GetService<IUserEventRetriever>()
+                .UserEventsById(userInfo.Id)
+                .ToArray();
 
             if (userEvents.Length > 0)
                 foreach (var userEvent in userEvents)

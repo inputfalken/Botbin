@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Botbin.GameTracking;
 using Botbin.GameTracking.Implementations;
+using Botbin.GameTracking.UserEvent;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -12,21 +14,23 @@ namespace Botbin {
         public static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(new CommandService())
             .AddSingleton(new DiscordSocketClient())
-            .AddSingleton(new GameTracker())
+            .AddSingleton<IGameTracker>(p => new GameTracker())
+            .AddSingleton<IUserListener>(p => p.GetService<IGameTracker>())
+            .AddSingleton<IUserEventRetriever>(p => p.GetService<IGameTracker>())
             .BuildServiceProvider();
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
 
         private static async Task StartAsync() {
             var client = Services.GetService<DiscordSocketClient>();
-            var gameTracker = Services.GetService<GameTracker>();
+            var listener = Services.GetService<IUserListener>();
             var commandService = Services.GetService<CommandService>();
 
             client.Log += Log;
-            client.GuildMemberUpdated += gameTracker.Listen;
+            client.GuildMemberUpdated += listener.Listen;
             client.MessageReceived += HandleCommandAsync;
-            await commandService.AddModulesAsync(Assembly.GetEntryAssembly());
 
+            await commandService.AddModulesAsync(Assembly.GetEntryAssembly());
             var token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Machine);
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();

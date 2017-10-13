@@ -2,7 +2,7 @@
 using Botbin.GameTracking.UserEvent;
 
 namespace Botbin.GameTracking {
-    internal interface IGameTracker {
+    internal interface IUserEventRetriever {
         IEnumerable<IUserEvent> UserEventsById(ulong id);
         IEnumerable<IUserEvent> UserEvents();
     }

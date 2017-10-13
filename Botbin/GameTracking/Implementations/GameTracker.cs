@@ -7,7 +7,8 @@ using Botbin.GameTracking.UserEvent.Enums;
 using Discord;
 
 namespace Botbin.GameTracking.Implementations {
-    internal class GameTracker : IUserListener, IGameTracker {
+    /// <inheritdoc />
+    internal class GameTracker : IGameTracker{
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
 
         public GameTracker() => _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
