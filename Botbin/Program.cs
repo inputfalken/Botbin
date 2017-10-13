@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Botbin {
     internal static class Program {
-        public static readonly IServiceProvider Services = new ServiceCollection()
+        public static IServiceProvider Services { get; } = new ServiceCollection()
             .AddSingleton(new CommandService())
             .AddSingleton(new DiscordSocketClient())
             .AddSingleton<IGameTracker>(p => new GameTracker())
