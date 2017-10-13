@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -14,8 +14,10 @@ namespace Botbin {
             .AddSingleton(new DiscordSocketClient())
             .BuildServiceProvider();
 
-        private static readonly Dictionary<string, (DateTime, SocketUser)> Dictionary =
-            new Dictionary<string, (DateTime, SocketUser)>();
+        private static readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> Dictionary =
+            new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
+
+        public static ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> UserEvents { get; } = Dictionary;
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
 
@@ -34,19 +36,38 @@ namespace Botbin {
             await Task.Delay(-1);
         }
 
-        private static async Task Discord_UserUpdated(SocketUser before, SocketUser after) {
-            if (!before.Game.HasValue && after.Game.HasValue) {
-                Dictionary.Add(after.Username, (DateTime.Now, after));
-                var message = $"User {after.Username} is playing {after.Game.Value.Name}";
-                await Log(new LogMessage(LogSeverity.Info, "GuildMemberUpdated", message));
+        private static Task Discord_UserUpdated(SocketUser before, SocketUser after) {
+            var quitGame = before.Game.HasValue && !after.Game.HasValue;
+            var startGame = !before.Game.HasValue && after.Game.HasValue;
+            var id = before.Id;
+
+            if (startGame) {
+                Dictionary.AddOrUpdate(
+                    id,
+                    _ => Add(after, UserEventType.StartGame),
+                    (_, queue) => Update(after, UserEventType.StartGame, queue)
+                );
             }
-            else if (before.Game.HasValue && !after.Game.HasValue) {
-                var valueTuple = Dictionary[after.Username];
-                var timeSpan = DateTime.Now - valueTuple.Item1;
-                var message =
-                    $"{valueTuple.Item2.Username} played {before.Game} for {timeSpan.Minutes} min and  {timeSpan.Seconds} sec.";
-                await Log(new LogMessage(LogSeverity.Info, "GuildMemberUpdated", message));
+            else if (quitGame) {
+                Dictionary.AddOrUpdate(
+                    id,
+                    _ => Add(before, UserEventType.QuitGame),
+                    (_, queue) => Update(before, UserEventType.QuitGame, queue)
+                );
             }
+            return Task.CompletedTask;
+        }
+
+        private static ConcurrentQueue<IUserEvent> Add(IUser user, UserEventType type) {
+            var concurrentQueue = new ConcurrentQueue<IUserEvent>();
+            concurrentQueue.Enqueue(new UserEvent(user, type));
+            return concurrentQueue;
+        }
+
+        private static ConcurrentQueue<IUserEvent> Update(IUser user, UserEventType type,
+            ConcurrentQueue<IUserEvent> events) {
+            events.Enqueue(new UserEvent(user, type));
+            return events;
         }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {

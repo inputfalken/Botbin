@@ -4,29 +4,15 @@ using Discord;
 using Discord.Commands;
 
 namespace Botbin {
-    public class InfoModule : ModuleBase<SocketCommandContext> {
+    public class GiphyCommandCenter : ModuleBase<SocketCommandContext> {
         private static readonly string GiphyKey =
             Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Machine);
 
         private readonly Giphy _giphy = new Giphy(GiphyKey);
 
-        [Command("say")]
-        [Summary("Echos a message.")]
-        public async Task SayAsync([Remainder] [Summary("The text to echo")] string echo) =>
-            await Context.Channel.SendMessageAsync(echo);
-
-        [Command("days")]
-        [Summary("Displays how many days the account has existed.")]
-        public async Task DaysAsync() {
-            var daysOfExistance = Math.Abs((Context.User.CreatedAt - DateTimeOffset.Now).Days);
-
-            await Context.Channel.SendMessageAsync(
-                $"Your account is {daysOfExistance} {(daysOfExistance == 1 ? "day" : "days")} old.");
-        }
-
-        [Command("wtf")]
+        [Command("giphy", RunMode = RunMode.Async)]
         [Summary("Display a random GIF based on a search term")]
-        public async Task WtfAsync([Remainder] string message) {
+        public async Task Giphy([Remainder] string message) {
             try {
                 var link = (await _giphy.Search(message)).AbsoluteUri;
                 await Context.Channel.SendMessageAsync(link);
@@ -40,9 +26,9 @@ namespace Botbin {
             }
         }
 
-        [Command("wtf")]
+        [Command("giphy", RunMode = RunMode.Async)]
         [Summary("Display a random GIF")]
-        public async Task WtfAsync() {
+        public async Task Giphy() {
             var link = (await _giphy.Random()).AbsoluteUri;
 
             await Context.Channel.SendMessageAsync(link);
