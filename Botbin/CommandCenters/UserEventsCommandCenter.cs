@@ -10,7 +10,7 @@ namespace Botbin.CommandCenters {
     public class UserEventsCommandCenter : ModuleBase<SocketCommandContext> {
         [Command("history", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history of the user.")]
-        public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketUser user = null) {
+        public async Task History([Summary("The (optional) user to get info for")] SocketUser user = null) {
             var userInfo = user ?? Context.Client.CurrentUser;
             var userEvents = await Program.Services
                 .GetService<IUserEventRetriever>()

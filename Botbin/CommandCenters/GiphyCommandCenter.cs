@@ -11,9 +11,9 @@ namespace Botbin.CommandCenters {
 
         private readonly GiphyService _giphyService = new GiphyService(GiphyKey);
 
-        [Command("giphy", RunMode = RunMode.Async)]
+        [Command("wtf", RunMode = RunMode.Async)]
         [Summary("Display a random GIF based on a search term")]
-        public async Task Giphy([Remainder] string message) {
+        public async Task Wtf([Remainder] string message) {
             try {
                 var link = (await _giphyService.Search(message)).AbsoluteUri;
                 await Context.Channel.SendMessageAsync(link);
@@ -27,9 +27,9 @@ namespace Botbin.CommandCenters {
             }
         }
 
-        [Command("giphy", RunMode = RunMode.Async)]
+        [Command("wtf", RunMode = RunMode.Async)]
         [Summary("Display a random GIF")]
-        public async Task Giphy() {
+        public async Task Wtf() {
             var link = (await _giphyService.Random()).AbsoluteUri;
 
             await Context.Channel.SendMessageAsync(link);
