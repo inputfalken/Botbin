@@ -1,8 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Botbin.GameTracking;
+using Botbin.GameTracking.UserEvent;
 using Botbin.GameTracking.UserEvent.Enums;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -53,7 +53,9 @@ namespace Botbin.CommandCenters {
                     await Context.Channel.SendMessageAsync("No data available to save.");
                 }
             }
-            else await Context.Channel.SendMessageAsync("Pfft, i wont save this. You are not the boss of me!");
+            else {
+                await Context.Channel.SendMessageAsync("Pfft, i wont save this. You are not the boss of me!");
+            }
         }
     }
 }
