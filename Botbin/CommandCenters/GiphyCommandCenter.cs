@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Botbin.Giphy;
 using Discord;
 using Discord.Commands;
 
-namespace Botbin {
+namespace Botbin.CommandCenters {
     public class GiphyCommandCenter : ModuleBase<SocketCommandContext> {
         private static readonly string GiphyKey =
             Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Machine);
 
-        private readonly Giphy _giphy = new Giphy(GiphyKey);
+        private readonly GiphyService _giphyService = new GiphyService(GiphyKey);
 
         [Command("giphy", RunMode = RunMode.Async)]
         [Summary("Display a random GIF based on a search term")]
         public async Task Giphy([Remainder] string message) {
             try {
-                var link = (await _giphy.Search(message)).AbsoluteUri;
+                var link = (await _giphyService.Search(message)).AbsoluteUri;
                 await Context.Channel.SendMessageAsync(link);
             }
             catch (Exception e) {
@@ -29,7 +30,7 @@ namespace Botbin {
         [Command("giphy", RunMode = RunMode.Async)]
         [Summary("Display a random GIF")]
         public async Task Giphy() {
-            var link = (await _giphy.Random()).AbsoluteUri;
+            var link = (await _giphyService.Random()).AbsoluteUri;
 
             await Context.Channel.SendMessageAsync(link);
         }

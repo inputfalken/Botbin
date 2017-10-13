@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Tasks;
+using Botbin.GameTracking.Implementations;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -9,65 +9,29 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Botbin {
     internal static class Program {
-        private static readonly IServiceProvider Services = new ServiceCollection()
+        public static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(new CommandService())
             .AddSingleton(new DiscordSocketClient())
+            .AddSingleton(new GameTracker())
             .BuildServiceProvider();
-
-        private static readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> Dictionary =
-            new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
-
-        public static ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> UserEvents { get; } = Dictionary;
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
 
         private static async Task StartAsync() {
             var client = Services.GetService<DiscordSocketClient>();
-            client.Log += Log;
-            client.GuildMemberUpdated += Discord_UserUpdated;
+            var gameTracker = Services.GetService<GameTracker>();
             var commandService = Services.GetService<CommandService>();
+
+            client.Log += Log;
+            client.GuildMemberUpdated += gameTracker.Listen;
             client.MessageReceived += HandleCommandAsync;
             await commandService.AddModulesAsync(Assembly.GetEntryAssembly());
+
             var token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Machine);
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
-
             // Block this task until the program is closed.
             await Task.Delay(-1);
-        }
-
-        private static Task Discord_UserUpdated(SocketUser before, SocketUser after) {
-            var quitGame = before.Game.HasValue && !after.Game.HasValue;
-            var startGame = !before.Game.HasValue && after.Game.HasValue;
-            var id = before.Id;
-
-            if (startGame) {
-                Dictionary.AddOrUpdate(
-                    id,
-                    _ => Add(after, UserEventType.StartGame),
-                    (_, queue) => Update(after, UserEventType.StartGame, queue)
-                );
-            }
-            else if (quitGame) {
-                Dictionary.AddOrUpdate(
-                    id,
-                    _ => Add(before, UserEventType.QuitGame),
-                    (_, queue) => Update(before, UserEventType.QuitGame, queue)
-                );
-            }
-            return Task.CompletedTask;
-        }
-
-        private static ConcurrentQueue<IUserEvent> Add(IUser user, UserEventType type) {
-            var concurrentQueue = new ConcurrentQueue<IUserEvent>();
-            concurrentQueue.Enqueue(new UserEvent(user, type));
-            return concurrentQueue;
-        }
-
-        private static ConcurrentQueue<IUserEvent> Update(IUser user, UserEventType type,
-            ConcurrentQueue<IUserEvent> events) {
-            events.Enqueue(new UserEvent(user, type));
-            return events;
         }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {

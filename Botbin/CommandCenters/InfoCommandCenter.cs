@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Discord.Commands;
 
-namespace Botbin {
+namespace Botbin.CommandCenters {
     public class InfoCommandCenter : ModuleBase<SocketCommandContext> {
         [Command("say")]
         [Summary("Echos a message.")]

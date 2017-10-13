@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Botbin.GameTracking.UserEvent.Enums;
 using Discord;
 
-namespace Botbin {
+namespace Botbin.GameTracking.UserEvent.Implementations {
     internal class UserEvent : IUserEvent {
         private readonly IUser _user;
-        public DateTime Time { get; }
-        public UserEventType Type { get; }
 
-        public UserEvent(IUser user, DateTime time, UserEventType type) {
+        public UserEvent(IUser user, DateTime time, UserAction type) {
             _user = user;
             Time = time;
-            Type = type;
+            Action = type;
             Id = user.Id;
             CreatedAt = user.CreatedAt;
             Mention = user.Mention;
@@ -25,7 +24,9 @@ namespace Botbin {
             Username = user.Username;
         }
 
-        public UserEvent(IUser user, UserEventType type) : this(user, DateTime.Now, type) { }
+        public UserEvent(IUser user, UserAction type) : this(user, DateTime.Now, type) { }
+        public DateTime Time { get; }
+        public UserAction Action { get; }
 
         public ulong Id { get; }
 

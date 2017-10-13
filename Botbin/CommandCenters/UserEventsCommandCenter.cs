@@ -1,30 +1,30 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Botbin.GameTracking.Implementations;
+using Botbin.GameTracking.UserEvent.Enums;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Botbin {
+namespace Botbin.CommandCenters {
     public class UserEventsCommandCenter : ModuleBase<SocketCommandContext> {
         [Command("history", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history of the user.")]
         public async Task UserInfoAsync([Summary("The (optional) user to get info for")] SocketUser user = null) {
             var userInfo = user ?? Context.Client.CurrentUser;
+            var userEvents = Program.Services.GetService<GameTracker>().GetUserEventsById(userInfo.Id).ToArray();
 
-            if (Program.UserEvents.TryGetValue(userInfo.Id, out var events)) {
-                foreach (var userEvent in events) {
-                    if (userEvent.Type == UserEventType.StartGame) {
+            if (userEvents.Length > 0)
+                foreach (var userEvent in userEvents)
+                    if (userEvent.Action == UserAction.StartGame)
                         await Context.Channel.SendMessageAsync(
                             $"User '{userEvent.Username}' started '{userEvent.Game}' at '{userEvent.Time}'.");
-                    }
-                    else {
+                    else
                         await Context.Channel.SendMessageAsync(
                             $"User '{userEvent.Username}' quit '{userEvent.Game}' at {userEvent.Time}.");
-                    }
-                }
-            }
-            else {
+            else
                 await Context.Channel.SendMessageAsync(
                     $"No game history found for user '{userInfo.Username}#{userInfo.Discriminator}'");
-            }
         }
     }
 }
