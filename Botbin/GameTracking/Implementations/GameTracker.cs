@@ -12,9 +12,9 @@ namespace Botbin.GameTracking.Implementations {
 
         public GameTracker() => _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
 
-        public IEnumerable<IUserEvent> GetUserEventsById(ulong id) => _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
+        public IEnumerable<IUserEvent> UserEventsById(ulong id) => _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
 
-        public IEnumerable<IUserEvent> GetUserEvents() => _dictionary.SelectMany(pair => pair.Value);
+        public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(pair => pair.Value);
 
         public Task Listen(IUser before, IUser after) {
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
