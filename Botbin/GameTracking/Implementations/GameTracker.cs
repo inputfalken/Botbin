@@ -8,40 +8,35 @@ using Discord;
 
 namespace Botbin.GameTracking.Implementations {
     /// <inheritdoc />
-    internal class GameTracker : IGameTracker{
+    internal class GameTracker : IGameTracker {
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
 
         public GameTracker() => _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
 
-        public IEnumerable<IUserEvent> UserEventsById(ulong id) => _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
+        public IEnumerable<IUserEvent> UserEventsById(ulong id) =>
+            _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
 
-        public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(pair => pair.Value);
+        public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
         public Task Listen(IUser before, IUser after) {
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
             var id = before.Id;
+            if (startGame) Save(after, id, UserAction.StartGame);
+            else if (quitGame) Save(before, id, UserAction.QuitGame);
 
-            if (startGame)
-                _dictionary.AddOrUpdate(
-                    id,
-                    _ => Add(after, UserAction.StartGame),
-                    (_, queue) => Update(after, UserAction.StartGame, queue)
-                );
-            else if (quitGame)
-                _dictionary.AddOrUpdate(
-                    id,
-                    _ => Add(before, UserAction.QuitGame),
-                    (_, queue) => Update(before, UserAction.QuitGame, queue)
-                );
             return Task.CompletedTask;
         }
 
-        private static ConcurrentQueue<IUserEvent> Add(IUser user, UserAction type) {
-            var concurrentQueue = new ConcurrentQueue<IUserEvent>();
-            concurrentQueue.Enqueue(new UserEvent.Implementations.UserEvent(user, type));
-            return concurrentQueue;
-        }
+        private void Save(IUser before, ulong id, UserAction action) =>
+            _dictionary.AddOrUpdate(
+                id,
+                _ => NewKey(before, UserAction.QuitGame),
+                (_, queue) => Update(before, action, queue)
+            );
+
+        private static ConcurrentQueue<IUserEvent> NewKey(IUser user, UserAction type) =>
+            Update(user, type, new ConcurrentQueue<IUserEvent>());
 
         private static ConcurrentQueue<IUserEvent> Update(IUser user, UserAction type,
             ConcurrentQueue<IUserEvent> events) {
