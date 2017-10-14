@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Botbin.GameTracking;
-using Botbin.GameTracking.Implementations;
+using Botbin.UserTracking;
+using Botbin.UserTracking.Implementations;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -13,9 +13,9 @@ namespace Botbin {
         public static IServiceProvider Services { get; } = new ServiceCollection()
             .AddSingleton(new CommandService())
             .AddSingleton(new DiscordSocketClient())
-            .AddSingleton<IGameTracker>(p => new GameTracker())
-            .AddSingleton<IUserListener>(p => p.GetService<IGameTracker>())
-            .AddSingleton<IUserEventRetriever>(p => p.GetService<IGameTracker>())
+            .AddSingleton<IUserTracker>(p => new ConcurrentInMemoryUserTracker())
+            .AddSingleton<IUserListener>(p => p.GetService<IUserTracker>())
+            .AddSingleton<IUserEventRetriever>(p => p.GetService<IUserTracker>())
             .BuildServiceProvider();
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();

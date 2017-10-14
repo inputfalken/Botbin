@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using Botbin.GameTracking.UserEvent.Enums;
 using Discord;
 
-namespace Botbin.GameTracking.UserEvent.Implementations {
+
+namespace Botbin.UserTracking.UserEvent.Implementations {
     internal class UserEvent : IUserEvent {
         private readonly IUser _user;
 

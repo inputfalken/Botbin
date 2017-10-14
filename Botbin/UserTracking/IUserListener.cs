@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Discord;
 
-namespace Botbin.GameTracking {
+namespace Botbin.UserTracking {
     internal interface IUserListener {
         Task Listen(IUser before, IUser after);
     }

@@ -2,18 +2,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Botbin.GameTracking.UserEvent;
-using Botbin.GameTracking.UserEvent.Enums;
 using Discord;
+using Botbin.GameTracking.UserEvent.Enums;
+using Botbin.UserTracking.UserEvent;
 using static Botbin.GameTracking.UserEvent.Enums.UserAction;
-using static Discord.UserStatus;
 
-namespace Botbin.GameTracking.Implementations {
-    /// <inheritdoc />
-    internal class GameTracker : IGameTracker {
+namespace Botbin.UserTracking.Implementations {
+    internal class ConcurrentInMemoryUserTracker : IUserTracker {
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
 
-        public GameTracker() => _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
+        public ConcurrentInMemoryUserTracker() =>
+            _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
 
         public IEnumerable<IUserEvent> UserEventsById(ulong id) =>
             _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
@@ -23,8 +22,8 @@ namespace Botbin.GameTracking.Implementations {
         public Task Listen(IUser before, IUser after) {
             var id = before.Id;
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
-            var logIn = before.Status == Offline && after.Status == Online;
-            var logOff = before.Status == Online && after.Status == Offline;
+            var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
+            var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
 
             if (logIn) Save(after, id, LogIn);
