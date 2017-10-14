@@ -20,12 +20,12 @@ namespace Botbin.UserTracking.Implementations {
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
         public Task Listen(IUser before, IUser after) {
+            if (before.IsWebhook || before.IsBot) return Task.CompletedTask;
             var id = before.Id;
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
             var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
             var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
-
             if (logIn) Save(after, id, LogIn);
             if (logOff) Save(after, id, LogOff);
             if (startGame) Save(after, id, StartGame);
