@@ -20,6 +20,7 @@ namespace Botbin.CommandCenters {
             var userInfo = user ?? Context.Client.CurrentUser;
             var userEvents = await _eventRetriever
                 .UserEventsById(userInfo.Id)
+                .Where(u => u.Action == UserAction.QuitGame || u.Action == UserAction.StartGame)
                 .ToAsyncEnumerable()
                 .ToArray();
 
@@ -28,12 +29,12 @@ namespace Botbin.CommandCenters {
                     if (userEvent.Action == UserAction.StartGame)
                         await Context.Channel.SendMessageAsync(
                             $"User '{userEvent.Username}' started '{userEvent.Game}' at '{userEvent.Time}'.");
-                    else
+                    else if (userEvent.Action == UserAction.QuitGame)
                         await Context.Channel.SendMessageAsync(
                             $"User '{userEvent.Username}' quit '{userEvent.Game}' at {userEvent.Time}.");
-            else
-                await Context.Channel.SendMessageAsync(
-                    $"No game history found for user '{userInfo.Username}#{userInfo.Discriminator}'");
+                    else
+                        await Context.Channel.SendMessageAsync(
+                            $"No game history found for user '{userInfo.Username}#{userInfo.Discriminator}'");
         }
 
         [Command("save", RunMode = RunMode.Async)]
