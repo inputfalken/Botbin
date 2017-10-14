@@ -57,5 +57,16 @@ namespace Botbin.CommandCenters {
                 await Context.Channel.SendMessageAsync("Pfft, i wont save this. You are not the boss of me!");
             }
         }
+
+        [Command("activity", RunMode = RunMode.Async)]
+        public async Task Activity() {
+            await _eventRetriever
+                .UserEvents()
+                .ToAsyncEnumerable()
+                .ForEachAsync(async user => {
+                    var response = $"{user.Username} {user.Action} at {user.Time}";
+                    await Context.Channel.SendMessageAsync(response);
+                });
+        }
     }
 }

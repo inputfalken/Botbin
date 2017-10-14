@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Botbin.GameTracking;
 using Botbin.GameTracking.Implementations;
-using Botbin.GameTracking.UserEvent;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

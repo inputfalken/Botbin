@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Botbin.GameTracking.UserEvent;
 using Botbin.GameTracking.UserEvent.Enums;
 using Discord;
+using static Botbin.GameTracking.UserEvent.Enums.UserAction;
+using static Discord.UserStatus;
 
 namespace Botbin.GameTracking.Implementations {
     /// <inheritdoc />
@@ -19,19 +21,23 @@ namespace Botbin.GameTracking.Implementations {
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
         public Task Listen(IUser before, IUser after) {
-            var quitGame = before.Game.HasValue && !after.Game.HasValue;
-            var startGame = !before.Game.HasValue && after.Game.HasValue;
             var id = before.Id;
-            if (startGame) Save(after, id, UserAction.StartGame);
-            else if (quitGame) Save(before, id, UserAction.QuitGame);
+            var quitGame = before.Game.HasValue && !after.Game.HasValue;
+            var logIn = before.Status == Offline && after.Status == Online;
+            var logOff = before.Status == Online && after.Status == Offline;
+            var startGame = !before.Game.HasValue && after.Game.HasValue;
 
+            if (logIn) Save(after, id, LogIn);
+            if (logOff) Save(after, id, LogOff);
+            if (startGame) Save(after, id, StartGame);
+            if (quitGame) Save(before, id, QuitGame);
             return Task.CompletedTask;
         }
 
         private void Save(IUser before, ulong id, UserAction action) =>
             _dictionary.AddOrUpdate(
                 id,
-                _ => NewKey(before, UserAction.QuitGame),
+                _ => NewKey(before, action),
                 (_, queue) => Update(before, action, queue)
             );
 
