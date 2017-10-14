@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using Botbin.GameTracking.UserEvent.Enums;
 using Botbin.UserTracking.UserEvent;
-using static Botbin.GameTracking.UserEvent.Enums.UserAction;
+using Botbin.UserTracking.UserEvent.Enums;
+using static Botbin.UserTracking.UserEvent.Enums.UserAction;
 
 namespace Botbin.UserTracking.Implementations {
     internal class ConcurrentInMemoryUserTracker : IUserTracker {

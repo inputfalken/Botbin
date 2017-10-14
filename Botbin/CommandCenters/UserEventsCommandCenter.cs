@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Botbin.GameTracking.UserEvent.Enums;
 using Botbin.UserTracking;
+using Botbin.UserTracking.UserEvent.Enums;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,5 +1,5 @@
 ﻿using System;
-using Botbin.GameTracking.UserEvent.Enums;
+using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
 
 namespace Botbin.UserTracking.UserEvent {
