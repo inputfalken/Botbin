@@ -14,9 +14,9 @@ namespace Botbin.CommandCenters {
 
         public UserEventsCommandCenter() => _eventRetriever = Program.Services.GetService<IUserEventRetriever>();
 
-        [Command("history", RunMode = RunMode.Async)]
+        [Command("gamehistory", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history of the user.")]
-        public async Task History([Summary("The (optional) user to get info for")] SocketUser user = null) {
+        public async Task GameHistory([Summary("The (optional) user to get info for")] SocketUser user = null) {
             var userInfo = user ?? Context.Client.CurrentUser;
             var userEvents = await _eventRetriever
                 .UserEventsById(userInfo.Id)
