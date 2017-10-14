@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Botbin.GameTracking.UserEvent.Enums;
+using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
 
 
