@@ -4,5 +4,6 @@
         QuitGame = 1,
         LogOff = 2,
         LogIn = 3,
+        SentMessage = 4;
     }
 }

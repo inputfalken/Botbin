@@ -33,6 +33,23 @@ namespace Botbin.UserTracking.Implementations {
             return Task.CompletedTask;
         }
 
+        public Task ListenForMessages(IMessage message) {
+            var user = new UserEvent.Implementations.UserEvent(message.Author, SentMessage);
+            _dictionary.AddOrUpdate(
+                user.Id,
+                _ => {
+                    var concurrentQueue = new ConcurrentQueue<IUserEvent>();
+                    concurrentQueue.Enqueue(user);
+                    return concurrentQueue;
+                },
+                (_, queue) => {
+                    queue.Enqueue(user);
+                    return queue;
+                }
+            );
+            return Task.CompletedTask;
+        }
+
         private void Save(IUser before, ulong id, UserAction action) =>
             _dictionary.AddOrUpdate(
                 id,
