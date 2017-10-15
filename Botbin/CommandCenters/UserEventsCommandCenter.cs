@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking;
@@ -9,10 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace Botbin.CommandCenters {
-    public class UserEventsCommandCenter : ModuleBase<SocketCommandContext> {
+    public class UserEventModule : ModuleBase<SocketCommandContext> {
         private readonly IUserEventRetriever _eventRetriever;
 
-        public UserEventsCommandCenter() => _eventRetriever = Program.Services.GetService<IUserEventRetriever>();
+        public UserEventModule(IServiceProvider provider) =>
+            _eventRetriever = provider.GetService<IUserEventRetriever>();
 
         [Command("gamehistory", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history of the user.")]

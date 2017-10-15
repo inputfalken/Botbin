@@ -1,7 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using static Newtonsoft.Json.JsonConvert;
 
 namespace Botbin.Giphy {
     internal class GiphyService {
@@ -17,12 +17,12 @@ namespace Botbin.Giphy {
         public Task<Uri> Random() =>
             RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag=&rating=R"));
 
-        public Task<Uri> Search(string term) =>
+        public Task<Uri> Term(string term) =>
             RequestGif(new Uri(_baseUri,
                 $"/v1/gifs/translate?api_key={_key}&s={term}"));
 
         private async Task<Uri> RequestGif(Uri uri) => new Uri(
-            JsonConvert.DeserializeAnonymousType(
+            DeserializeAnonymousType(
                 await _client.GetStringAsync(uri)
                 , new {data = new {url = string.Empty}}
             ).data.url, UriKind.Absolute

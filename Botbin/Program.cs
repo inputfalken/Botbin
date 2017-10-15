@@ -1,18 +1,31 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Botbin.CommandCenters;
+using Botbin.Giphy;
 using Botbin.UserTracking;
 using Botbin.UserTracking.Implementations;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using static System.Environment;
 
 namespace Botbin {
     internal static class Program {
-        public static IServiceProvider Services { get; } = new ServiceCollection()
-            .AddSingleton(new CommandService())
-            .AddSingleton(new DiscordSocketClient())
+        private static readonly string GiphyKey;
+
+        private static readonly string DiscordToken;
+
+        static Program() {
+            DiscordToken = GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Machine);
+            GiphyKey = GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Machine);
+        }
+
+        private static IServiceProvider Services { get; } = new ServiceCollection()
+            .AddSingleton(p => new CommandService())
+            .AddSingleton(p => new DiscordSocketClient())
+            .AddSingleton(p => new GiphyService(GiphyKey))
             .AddSingleton<IUserTracker>(p => new ConcurrentInMemoryUserTracker())
             .AddSingleton<IUserListener>(p => p.GetService<IUserTracker>())
             .AddSingleton<IUserEventRetriever>(p => p.GetService<IUserTracker>())
@@ -23,7 +36,7 @@ namespace Botbin {
         private static async Task StartAsync() {
             var client = Services.GetService<DiscordSocketClient>();
             var listener = Services.GetService<IUserListener>();
-            var commandService = Services.GetService<CommandService>();
+            await AddModules(Services.GetService<CommandService>());
 
             client.Log += Log;
             client.GuildMemberUpdated += listener.ListenForGames;
@@ -31,12 +44,16 @@ namespace Botbin {
             client.MessageReceived += HandleCommandAsync;
             client.MessageReceived += listener.ListenForMessages;
 
-            await commandService.AddModulesAsync(Assembly.GetEntryAssembly());
-            var token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Machine);
-            await client.LoginAsync(TokenType.Bot, token);
+            await client.LoginAsync(TokenType.Bot, DiscordToken);
             await client.StartAsync();
             // Block this task until the program is closed.
             await Task.Delay(-1);
+        }
+
+        private static async Task AddModules(CommandService commandService) {
+            await commandService.AddModuleAsync<GiphyModule>();
+            await commandService.AddModuleAsync<UserEventModule>();
+            await commandService.AddModuleAsync<InfoCommandModule>();
         }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {

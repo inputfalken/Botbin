@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using Discord.Commands;
 
 namespace Botbin.CommandCenters {
-    public class InfoCommandCenter : ModuleBase<SocketCommandContext> {
+    public class InfoCommandModule : ModuleBase<SocketCommandContext> {
+        public InfoCommandModule(IServiceProvider provider) { }
+
         [Command("say")]
         [Summary("Echos a message.")]
         public async Task SayAsync([Remainder] [Summary("The text to echo")] string echo) =>
