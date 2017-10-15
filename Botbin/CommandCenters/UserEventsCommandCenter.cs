@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking;
+using Botbin.UserTracking.UserEvent;
 using Botbin.UserTracking.UserEvent.Enums;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using static System.Environment;
 
 namespace Botbin.CommandCenters {
     public class UserEventModule : ModuleBase<SocketCommandContext> {
@@ -63,13 +66,29 @@ namespace Botbin.CommandCenters {
 
         [Command("activity", RunMode = RunMode.Async)]
         public async Task Activity() {
-            await _eventRetriever
+            var events = await _eventRetriever
                 .UserEvents()
                 .ToAsyncEnumerable()
-                .ForEachAsync(async user => {
-                    var response = $"{user.Username} {user.Action} at {user.Time}";
-                    await Context.Channel.SendMessageAsync(response);
-                });
+                .ToList();
+            if (events.Any()) {
+                await Context.Channel.SendMessageAsync(FormatActivities(events));
+            }
+            else await Context.Channel.SendMessageAsync("Could not find any activity.");
+        }
+
+        private static string FormatActivities(IEnumerable<IUserEvent> events) => events.Aggregate(
+            $"__**Activities**__:{NewLine}`",
+            (a, c) => $"{a}{c.Username} {c.Action.ToString()} at {c.Time}{NewLine}"
+            , s => $"{s}`"
+        );
+
+        [Command("activity", RunMode = RunMode.Async)]
+        public async Task Activity([Summary("The user to get info for")] SocketUser user) {
+            var events = await _eventRetriever.UserEventsById(user.Id)
+                .ToAsyncEnumerable()
+                .ToList();
+            if (events.Any()) await Context.Channel.SendMessageAsync(FormatActivities(events));
+            else await Context.Channel.SendMessageAsync($"Could not find activity for '{user.Username}'.");
         }
     }
 }
