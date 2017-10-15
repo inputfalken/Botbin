@@ -3,12 +3,11 @@ using System.Threading.Tasks;
 using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
 
-
 namespace Botbin.UserTracking.UserEvent.Implementations {
     internal class UserEvent : IUserEvent {
         private readonly IUser _user;
 
-        public UserEvent(IUser user, DateTime time, UserAction type) {
+        public UserEvent(IUser user, DateTime time, UserAction type, string description) {
             _user = user;
             Time = time;
             Action = type;
@@ -21,13 +20,18 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
             Discriminator = user.Discriminator;
             DiscriminatorValue = user.DiscriminatorValue;
             IsBot = user.IsBot;
+            Description = description;
             IsWebhook = user.IsWebhook;
             Username = user.Username;
         }
 
-        public UserEvent(IUser user, UserAction type) : this(user, DateTime.Now, type) { }
+        public UserEvent(IUser user, UserAction type, string description = null) :
+            this(user, DateTime.Now, type, description ?? type.ToString()) { }
+
         public DateTime Time { get; }
         public UserAction Action { get; }
+
+        public string Description { get; }
 
         public ulong Id { get; }
 
