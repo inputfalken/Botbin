@@ -3,13 +3,16 @@ using System.Threading.Tasks;
 using Botbin.Giphy;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Botbin.CommandCenters {
-    public class GiphyCommandCenter : ModuleBase<SocketCommandContext> {
-        private static readonly string GiphyKey =
-            Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Machine);
+    public class GiphyModule : ModuleBase<SocketCommandContext> {
 
-        private readonly GiphyService _giphyService = new GiphyService(GiphyKey);
+        public GiphyModule(IServiceProvider provider) {
+            _giphyService = provider.GetService<GiphyService>();
+        }
+
+        private readonly GiphyService _giphyService;
 
         [Command("wtf", RunMode = RunMode.Async)]
         [Summary("Display a random GIF based on a search term")]

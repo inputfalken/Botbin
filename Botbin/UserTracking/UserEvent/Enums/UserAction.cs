@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Botbin.UserTracking.UserEvent.Enums {
-    internal enum UserAction {
+    public enum UserAction {
         [Display(Name = "Start Game")] StartGame = 0,
         [Display(Name = "Quit Game")] QuitGame = 1,
         [Display(Name = "Logged Off")] LogOff = 2,
