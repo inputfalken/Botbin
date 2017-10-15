@@ -59,7 +59,7 @@ namespace Botbin.UserTracking.Implementations {
             return Task.CompletedTask;
         }
 
-        private static bool NotHuman(IUser user) => !(user.IsWebhook || user.IsBot);
+        private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
 
         private void Save(IUser before, ulong id, UserAction action) =>
             _dictionary.AddOrUpdate(
