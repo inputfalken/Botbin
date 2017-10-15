@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
 using Botbin.UserTracking.UserEvent;
 using Botbin.UserTracking.UserEvent.Enums;
+using Discord;
 using static Botbin.UserTracking.UserEvent.Enums.UserAction;
 
 namespace Botbin.UserTracking.Implementations {
@@ -19,8 +18,6 @@ namespace Botbin.UserTracking.Implementations {
             _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
 
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
-
-        private static bool NotHuman(IUser user) => !(user.IsWebhook || user.IsBot);
 
         public Task ListenForGames(IUser before, IUser after) {
             if (NotHuman(before)) return Task.CompletedTask;
@@ -61,6 +58,8 @@ namespace Botbin.UserTracking.Implementations {
             );
             return Task.CompletedTask;
         }
+
+        private static bool NotHuman(IUser user) => !(user.IsWebhook || user.IsBot);
 
         private void Save(IUser before, ulong id, UserAction action) =>
             _dictionary.AddOrUpdate(
