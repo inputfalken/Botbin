@@ -18,7 +18,7 @@ namespace Botbin.CommandCenters {
         [Summary("Display a random GIF based on a search term")]
         public async Task Wtf([Remainder] string message) {
             try {
-                var link = (await _giphyService.Search(message)).AbsoluteUri;
+                var link = (await _giphyService.Term(message)).AbsoluteUri;
                 await Context.Channel.SendMessageAsync(link);
             }
             catch (Exception e) {
