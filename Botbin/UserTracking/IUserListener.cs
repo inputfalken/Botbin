@@ -3,7 +3,8 @@ using Discord;
 
 namespace Botbin.UserTracking {
     internal interface IUserListener {
-        Task Listen(IUser before, IUser after);
+        Task ListenForGames(IUser before, IUser after);
+        Task ListenForLoginsAndLogOuts(IUser before, IUser after);
         Task ListenForMessages(IMessage message);
     }
 }

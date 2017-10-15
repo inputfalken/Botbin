@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,22 +20,33 @@ namespace Botbin.UserTracking.Implementations {
 
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
-        public Task Listen(IUser before, IUser after) {
-            if (before.IsWebhook || before.IsBot) return Task.CompletedTask;
+        private static bool NotHuman(IUser user) => !(user.IsWebhook || user.IsBot);
+
+        public Task ListenForGames(IUser before, IUser after) {
+            if (NotHuman(before)) return Task.CompletedTask;
             var id = before.Id;
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
-            var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
-            var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
-            if (logIn) Save(after, id, LogIn);
-            if (logOff) Save(after, id, LogOff);
             if (startGame) Save(after, id, StartGame);
             if (quitGame) Save(before, id, QuitGame);
             return Task.CompletedTask;
         }
 
+        public Task ListenForLoginsAndLogOuts(IUser before, IUser after) {
+            if (NotHuman(before)) return Task.CompletedTask;
+            var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
+            var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
+            var beforeId = before.Id;
+            if (logIn) Save(after, beforeId, LogIn);
+            if (logOff) Save(after, beforeId, LogOff);
+            return Task.CompletedTask;
+        }
+
         public Task ListenForMessages(IMessage message) {
-            var user = new UserEvent.Implementations.UserEvent(message.Author, SentMessage);
+            var author = message.Author;
+            if (NotHuman(author)) return Task.CompletedTask;
+            var description = $"{SentMessage} '{message}'.";
+            var user = new UserEvent.Implementations.UserEvent(author, SentMessage, description);
             _dictionary.AddOrUpdate(
                 user.Id,
                 _ => {

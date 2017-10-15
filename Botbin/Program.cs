@@ -26,8 +26,10 @@ namespace Botbin {
             var commandService = Services.GetService<CommandService>();
 
             client.Log += Log;
-            client.GuildMemberUpdated += listener.Listen;
+            client.GuildMemberUpdated += listener.ListenForGames;
+            client.GuildMemberUpdated += listener.ListenForLoginsAndLogOuts;
             client.MessageReceived += HandleCommandAsync;
+            client.MessageReceived += listener.ListenForMessages;
 
             await commandService.AddModulesAsync(Assembly.GetEntryAssembly());
             var token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Machine);

@@ -6,5 +6,6 @@ namespace Botbin.UserTracking.UserEvent {
     internal interface IUserEvent : IUser {
         DateTime Time { get; }
         UserAction Action { get; }
+        string Description { get; }
     }
 }
