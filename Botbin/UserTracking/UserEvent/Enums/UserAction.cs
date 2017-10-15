@@ -6,6 +6,6 @@ namespace Botbin.UserTracking.UserEvent.Enums {
         [Display(Name = "Quit Game")] QuitGame = 1,
         [Display(Name = "Logged Off")] LogOff = 2,
         [Display(Name = "Logged In")] LogIn = 3,
-        [Display(Name = "Sent Message")] SentMessage = 4
+        [Display(Name = "Sent Message")] SendMessage = 4
     }
 }
