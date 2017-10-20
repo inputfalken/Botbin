@@ -9,22 +9,14 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using static System.Environment;
+using static System.EnvironmentVariableTarget;
 
 namespace Botbin {
     internal static class Program {
-        private static readonly string GiphyKey;
-
-        private static readonly string DiscordToken;
-
-        static Program() {
-            DiscordToken = GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Machine);
-            GiphyKey = GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Machine);
-        }
-
         private static IServiceProvider Services { get; } = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
-            .AddSingleton(p => new GiphyService(GiphyKey))
+            .AddSingleton(p => new GiphyService(GetEnvironmentVariable("GIPHY_API_KEY", Machine)))
             .AddSingleton(p => new ConcurrentInMemoryUserTracker())
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentInMemoryUserTracker>())
             .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentInMemoryUserTracker>())
@@ -43,7 +35,7 @@ namespace Botbin {
             client.MessageReceived += HandleCommandAsync;
             client.MessageReceived += listener.ListenForMessages;
 
-            await client.LoginAsync(TokenType.Bot, DiscordToken);
+            await client.LoginAsync(TokenType.Bot, GetEnvironmentVariable("DISCORD_BOT_TOKEN", Machine));
             await client.StartAsync();
             // Block this task until the program is closed.
             await Task.Delay(-1);
