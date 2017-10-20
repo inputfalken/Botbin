@@ -8,11 +8,12 @@ using Discord;
 using static Botbin.UserTracking.UserEvent.Enums.UserAction;
 
 namespace Botbin.UserTracking.Implementations {
-    internal class ConcurrentInMemoryUserTracker : IUserTracker {
+    internal class ConcurrentInMemoryUserTracker : IUserListener, IUserEventRetriever {
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
 
-        public ConcurrentInMemoryUserTracker() =>
+        public ConcurrentInMemoryUserTracker() {
             _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
+        }
 
         public IEnumerable<IUserEvent> UserEventsById(ulong id) =>
             _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();

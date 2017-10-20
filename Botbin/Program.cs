@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading.Tasks;
 using Botbin.CommandCenters;
 using Botbin.Giphy;
@@ -26,9 +25,9 @@ namespace Botbin {
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton(p => new GiphyService(GiphyKey))
-            .AddSingleton<IUserTracker>(p => new ConcurrentInMemoryUserTracker())
-            .AddSingleton<IUserListener>(p => p.GetService<IUserTracker>())
-            .AddSingleton<IUserEventRetriever>(p => p.GetService<IUserTracker>())
+            .AddSingleton(p => new ConcurrentInMemoryUserTracker())
+            .AddSingleton<IUserListener>(p => p.GetService<ConcurrentInMemoryUserTracker>())
+            .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentInMemoryUserTracker>())
             .BuildServiceProvider();
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
