@@ -13,7 +13,7 @@ using static System.EnvironmentVariableTarget;
 
 namespace Botbin {
     internal static class Program {
-        private static IServiceProvider Services { get; } = new ServiceCollection()
+        private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton(p => new GiphyService(GetEnvironmentVariable("GIPHY_API_KEY", Machine)))
