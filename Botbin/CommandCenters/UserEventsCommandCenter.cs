@@ -77,9 +77,9 @@ namespace Botbin.CommandCenters {
         }
 
         private static string FormatActivities(IEnumerable<IUserEvent> events) => events.Aggregate(
-            $"__**Activities**__:{NewLine}`",
+            $"__**Activities**__:{NewLine}```",
             (a, c) => $"{a}{c.Username} {c.Action.ToString()} at {c.Time}{NewLine}"
-            , s => $"{s}`"
+            , s => $"{s}```"
         );
 
         [Command("activity", RunMode = RunMode.Async)]
