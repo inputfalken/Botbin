@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking.UserEvent;
-using Botbin.UserTracking.UserEvent.Enums;
 using Botbin.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,8 +37,8 @@ namespace Botbin.UserTracking.Implementations {
             if (NotHuman(before)) return Task.CompletedTask;
             var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
             var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
-            if (logIn) Save(new UserEvent.Implementations.UserLog(after, LogIn));
-            if (logOff) Save(new UserEvent.Implementations.UserLog(after, LogOff));
+            if (logIn) Save(new UserLog(after, LogIn));
+            if (logOff) Save(new UserLog(after, LogOff));
             return Task.CompletedTask;
         }
 

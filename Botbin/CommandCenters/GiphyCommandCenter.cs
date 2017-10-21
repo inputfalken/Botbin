@@ -7,12 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Botbin.CommandCenters {
     public class GiphyModule : ModuleBase<SocketCommandContext> {
-
-        public GiphyModule(IServiceProvider provider) {
-            _giphyService = provider.GetService<GiphyService>();
-        }
-
         private readonly GiphyService _giphyService;
+
+        public GiphyModule(IServiceProvider provider) => _giphyService = provider.GetService<GiphyService>();
 
         [Command("wtf", RunMode = RunMode.Async)]
         [Summary("Display a random GIF based on a search term")]

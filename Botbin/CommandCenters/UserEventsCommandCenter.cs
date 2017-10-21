@@ -41,9 +41,10 @@ namespace Botbin.CommandCenters {
                 );
                 await Context.Channel.SendMessageAsync(msg);
             }
-            else
+            else {
                 await Context.Channel.SendMessageAsync(
                     $"No game history found for user '{userInfo.Username}#{userInfo.Discriminator}'");
+            }
         }
 
         [Command("save", RunMode = RunMode.Async)]
@@ -72,9 +73,7 @@ namespace Botbin.CommandCenters {
                 .UserEvents()
                 .ToAsyncEnumerable()
                 .ToList();
-            if (events.Any()) {
-                await Context.Channel.SendMessageAsync(FormatActivities(events));
-            }
+            if (events.Any()) await Context.Channel.SendMessageAsync(FormatActivities(events));
             else await Context.Channel.SendMessageAsync("Could not find any activity.");
         }
 
