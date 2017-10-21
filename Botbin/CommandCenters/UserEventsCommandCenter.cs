@@ -15,9 +15,12 @@ using static System.Environment;
 namespace Botbin.CommandCenters {
     public class UserEventModule : ModuleBase<SocketCommandContext> {
         private readonly IUserEventRetriever _eventRetriever;
+        private readonly Settings _settings;
 
-        public UserEventModule(IServiceProvider provider) =>
+        public UserEventModule(IServiceProvider provider) {
             _eventRetriever = provider.GetService<IUserEventRetriever>();
+            _settings = provider.GetService<Settings>();
+        }
 
         [Command("gamehistory", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history of the user.")]
@@ -45,8 +48,7 @@ namespace Botbin.CommandCenters {
 
         [Command("save", RunMode = RunMode.Async)]
         public async Task Save() {
-            const ulong admin = 318468838058360846;
-            if (Context.User.Id == admin) {
+            if (_settings.IsAdmin(Context.User.Id)) {
                 var userEvents = await _eventRetriever
                     .UserEvents()
                     .ToAsyncEnumerable()
