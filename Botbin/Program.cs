@@ -17,6 +17,7 @@ namespace Botbin {
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton(p => new GiphyService(GetEnvironmentVariable("GIPHY_API_KEY", Machine)))
+            .AddSingleton(p => new Settings('~', GetEnvironmentVariable("DISCORD_BOT_TOKEN", Machine)))
             .AddSingleton(p => new ConcurrentInMemoryUserTracker())
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentInMemoryUserTracker>())
             .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentInMemoryUserTracker>())
@@ -27,6 +28,7 @@ namespace Botbin {
         private static async Task StartAsync() {
             var client = Services.GetService<DiscordSocketClient>();
             var listener = Services.GetService<IUserListener>();
+            var settings = Services.GetService<Settings>();
             await AddModules(Services.GetService<CommandService>());
 
             client.Log += Log;
@@ -35,7 +37,7 @@ namespace Botbin {
             client.MessageReceived += HandleCommandAsync;
             client.MessageReceived += listener.ListenForMessages;
 
-            await client.LoginAsync(TokenType.Bot, GetEnvironmentVariable("DISCORD_BOT_TOKEN", Machine));
+            await client.LoginAsync(TokenType.Bot, settings.BotToken);
             await client.StartAsync();
             // Block this task until the program is closed.
             await Task.Delay(-1);
@@ -48,6 +50,7 @@ namespace Botbin {
         }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {
+            var settings = Services.GetService<Settings>();
             var commands = Services.GetService<CommandService>();
             var client = Services.GetService<DiscordSocketClient>();
             // Don't process the command if it was a System Message
@@ -55,7 +58,7 @@ namespace Botbin {
             // Create a number to track where the prefix ends and the command begins
             var argPos = 0;
             // Determine if the message is a command, based on if it starts with '!' or a mention prefix
-            if (!(message.HasCharPrefix('~', ref argPos) ||
+            if (!(message.HasCharPrefix(settings.CommandPrefix, ref argPos) ||
                   message.HasMentionPrefix(client.CurrentUser, ref argPos))) return;
             // Create a Command Context
             var context = new SocketCommandContext(client, message);
