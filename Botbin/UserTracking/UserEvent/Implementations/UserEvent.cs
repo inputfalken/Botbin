@@ -22,12 +22,12 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
         public string Username { get; }
     }
 
-    class UserMessage : UserLog {
+    sealed class UserMessage : UserLog {
         public string Message { get; }
         public UserMessage(IUser user, UserAction type, string message) : base(user, type) => Message = message;
     }
 
-    class UserGame : UserLog {
+    sealed class UserGame : UserLog {
         public Game Game { get; }
         public UserGame(IUser user, UserAction type, Game game) : base(user, type) => Game = game;
     }
