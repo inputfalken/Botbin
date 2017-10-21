@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking.UserEvent;
 using Botbin.UserTracking.UserEvent.Enums;
+using Botbin.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using static Botbin.UserTracking.UserEvent.Enums.UserAction;
@@ -26,11 +27,10 @@ namespace Botbin.UserTracking.Implementations {
 
         public Task ListenForGames(IUser before, IUser after) {
             if (NotHuman(before)) return Task.CompletedTask;
-            var id = before.Id;
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
-            if (startGame) Save(after, id, StartGame);
-            if (quitGame) Save(before, id, QuitGame);
+            if (startGame) Save(new UserGame(before, StartGame, after.Game.Value));
+            if (quitGame) Save(new UserGame(after, QuitGame, before.Game.Value));
             return Task.CompletedTask;
         }
 
@@ -38,9 +38,8 @@ namespace Botbin.UserTracking.Implementations {
             if (NotHuman(before)) return Task.CompletedTask;
             var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
             var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
-            var beforeId = before.Id;
-            if (logIn) Save(after, beforeId, LogIn);
-            if (logOff) Save(after, beforeId, LogOff);
+            if (logIn) Save(new UserEvent.Implementations.UserLog(after, LogIn));
+            if (logOff) Save(new UserEvent.Implementations.UserLog(after, LogOff));
             return Task.CompletedTask;
         }
 
@@ -48,7 +47,8 @@ namespace Botbin.UserTracking.Implementations {
             var author = message.Author;
             if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
             var description = $"{SendMessage} '{message}'.";
-            var user = new UserEvent.Implementations.UserEvent(author, SendMessage, description);
+            var user = new UserMessage(author, SendMessage, description);
+
             _dictionary.AddOrUpdate(
                 user.Id,
                 _ => {
@@ -68,19 +68,19 @@ namespace Botbin.UserTracking.Implementations {
 
         private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
 
-        private void Save(IUser before, ulong id, UserAction action) =>
+        private void Save(IUserEvent user) =>
             _dictionary.AddOrUpdate(
-                id,
-                _ => NewKey(before, action),
-                (_, queue) => Update(before, action, queue)
+                user.Id,
+                _ => NewKey(user),
+                (_, queue) => Update(user, queue)
             );
 
-        private static ConcurrentQueue<IUserEvent> NewKey(IUser user, UserAction type) =>
-            Update(user, type, new ConcurrentQueue<IUserEvent>());
+        private static ConcurrentQueue<IUserEvent> NewKey(IUserEvent user) =>
+            Update(user, new ConcurrentQueue<IUserEvent>());
 
-        private static ConcurrentQueue<IUserEvent> Update(IUser user, UserAction type,
+        private static ConcurrentQueue<IUserEvent> Update(IUserEvent user,
             ConcurrentQueue<IUserEvent> events) {
-            events.Enqueue(new UserEvent.Implementations.UserEvent(user, type));
+            events.Enqueue(user);
             return events;
         }
     }
