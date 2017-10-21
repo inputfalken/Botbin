@@ -18,7 +18,7 @@ namespace Botbin {
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton(p => new GiphyService(GetEnvironmentVariable("GIPHY_API_KEY", Machine)))
             .AddSingleton(p => new Settings('~', GetEnvironmentVariable("DISCORD_BOT_TOKEN", Machine)))
-            .AddSingleton(p => new ConcurrentInMemoryUserTracker())
+            .AddSingleton(p => new ConcurrentInMemoryUserTracker(p))
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentInMemoryUserTracker>())
             .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentInMemoryUserTracker>())
             .BuildServiceProvider();

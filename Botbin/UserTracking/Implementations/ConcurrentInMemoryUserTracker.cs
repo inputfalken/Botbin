@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,14 +6,17 @@ using System.Threading.Tasks;
 using Botbin.UserTracking.UserEvent;
 using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
+using Microsoft.Extensions.DependencyInjection;
 using static Botbin.UserTracking.UserEvent.Enums.UserAction;
 
 namespace Botbin.UserTracking.Implementations {
     internal class ConcurrentInMemoryUserTracker : IUserListener, IUserEventRetriever {
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
+        private readonly Settings _settings;
 
-        public ConcurrentInMemoryUserTracker() {
+        public ConcurrentInMemoryUserTracker(IServiceProvider provider) {
             _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
+            _settings = provider.GetService<Settings>();
         }
 
         public IEnumerable<IUserEvent> UserEventsById(ulong id) =>
@@ -42,7 +46,7 @@ namespace Botbin.UserTracking.Implementations {
 
         public Task ListenForMessages(IMessage message) {
             var author = message.Author;
-            if (NotHuman(author)) return Task.CompletedTask;
+            if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
             var description = $"{SendMessage} '{message}'.";
             var user = new UserEvent.Implementations.UserEvent(author, SendMessage, description);
             _dictionary.AddOrUpdate(
@@ -59,6 +63,8 @@ namespace Botbin.UserTracking.Implementations {
             );
             return Task.CompletedTask;
         }
+
+        private bool Command(string message) => message.StartsWith(_settings.CommandPrefix);
 
         private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
 
