@@ -45,8 +45,7 @@ namespace Botbin.UserTracking.Implementations {
         public Task ListenForMessages(IMessage message) {
             var author = message.Author;
             if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
-            var description = $"{SendMessage} '{message}'.";
-            var user = new UserMessage(author, SendMessage, description);
+            var user = new UserMessage(author, SendMessage, message.Content);
 
             _dictionary.AddOrUpdate(
                 user.Id,
