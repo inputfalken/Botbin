@@ -35,8 +35,9 @@ namespace Botbin.CommandCenters {
 
             if (userGames.Length > 0) {
                 var msg = userGames.Aggregate(
-                    $"__**{userInfo.Username} Game History**__:{NewLine}",
-                    (a, c) => $"{a}{c.Action} {c.Game.Name} at {c.Time}{NewLine}"
+                    $"__**{userInfo.Username} Game History**__:{NewLine}```",
+                    (a, c) => $"{a}{c.Action} {c.Game.Name} at {c.Time}{NewLine}",
+                    s => $"{s}```"
                 );
                 await Context.Channel.SendMessageAsync(msg);
             }
