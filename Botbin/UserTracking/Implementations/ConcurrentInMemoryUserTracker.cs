@@ -42,7 +42,7 @@ namespace Botbin.UserTracking.Implementations {
 
         public Task ListenForMessages(IMessage message) {
             var author = message.Author;
-            if (NotHuman(author)) return Task.CompletedTask;
+            if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
             var description = $"{SendMessage} '{message}'.";
             var user = new UserEvent.Implementations.UserEvent(author, SendMessage, description);
             _dictionary.AddOrUpdate(
@@ -59,6 +59,8 @@ namespace Botbin.UserTracking.Implementations {
             );
             return Task.CompletedTask;
         }
+
+        private static bool Command(string message) => message.StartsWith("~");
 
         private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
 
