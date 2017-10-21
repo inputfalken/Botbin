@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
 
@@ -20,6 +22,9 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
         public ulong Id { get; }
 
         public string Username { get; }
+
+        public static IEnumerable<IUser> MapToUser(IEnumerable<IUser>users, IEnumerable<IUserEvent> userEvents) =>
+            userEvents.Join(users, ue => ue.Id, u => u.Id, (ue, u) => u);
     }
 
     internal sealed class UserMessage : UserLog {
