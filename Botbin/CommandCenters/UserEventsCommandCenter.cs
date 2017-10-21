@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking;
 using Botbin.UserTracking.UserEvent;
-using Botbin.UserTracking.UserEvent.Enums;
+using Botbin.UserTracking.UserEvent.Implementations;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,20 +23,19 @@ namespace Botbin.CommandCenters {
         [Summary("Retrieves the  game history of the user.")]
         public async Task GameHistory([Summary("The (optional) user to get info for")] SocketUser user = null) {
             var userInfo = user ?? Context.Client.CurrentUser;
-            var userEvents = await _eventRetriever
+            var userGames = await _eventRetriever
                 .UserEventsById(userInfo.Id)
-                .Where(u => u.Action == UserAction.QuitGame || u.Action == UserAction.StartGame)
+                .Where(u => u is UserGame)
+                .Cast<UserGame>()
                 .ToAsyncEnumerable()
                 .ToArray();
 
-            if (userEvents.Length > 0) {
-                foreach (var userEvent in userEvents)
-                    if (userEvent.Action == UserAction.StartGame)
-                        await Context.Channel.SendMessageAsync(
-                            $"User '{userEvent.Username}' started '{userEvent.Game}' at '{userEvent.Time}'.");
-                    else if (userEvent.Action == UserAction.QuitGame)
-                        await Context.Channel.SendMessageAsync(
-                            $"User '{userEvent.Username}' quit '{userEvent.Game}' at {userEvent.Time}.");
+            if (userGames.Length > 0) {
+                var msg = userGames.Aggregate(
+                    $"__**{userInfo.Username} Game History**__:{NewLine}",
+                    (a, c) => $"{a}{c.Action} {c.Game.Name} at {c.Time}{NewLine}"
+                );
+                await Context.Channel.SendMessageAsync(msg);
             }
             else
                 await Context.Channel.SendMessageAsync(
