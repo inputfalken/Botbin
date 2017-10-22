@@ -26,14 +26,13 @@ namespace Botbin.CommandCenters {
         [Summary("Retrieves the  game history of the user.")]
         public async Task GameHistory([Summary("The (optional) user to get info for")] SocketUser user = null) {
             var userInfo = user ?? Context.Client.CurrentUser;
-            var userGames = await _eventRetriever
+            var userGames = _eventRetriever
                 .UserEventsById(userInfo.Id)
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .ToAsyncEnumerable()
-                .ToArray();
+                .OrderBy(game => game.Time);
 
-            if (userGames.Length > 0) {
+            if (userGames.Any()) {
                 var msg = userGames.Aggregate(
                     $"__**{userInfo.Username} Game History**__:{NewLine}```",
                     (a, c) => $"{a}{c.Action} {c.Game.Name} at {c.Time}{NewLine}",
@@ -50,11 +49,8 @@ namespace Botbin.CommandCenters {
         [Command("save", RunMode = RunMode.Async)]
         public async Task Save() {
             if (_settings.IsAdmin(Context.User.Id)) {
-                var userEvents = await _eventRetriever
-                    .UserEvents()
-                    .ToAsyncEnumerable()
-                    .ToArray();
-                if (userEvents.Length > 0) {
+                var userEvents = _eventRetriever.UserEvents();
+                if (userEvents.Any()) {
                     await File.WriteAllTextAsync(".\\history.json", JsonConvert.SerializeObject(userEvents));
                     await Context.Channel.SendMessageAsync("Successfully saved content to disc.");
                 }
@@ -69,25 +65,23 @@ namespace Botbin.CommandCenters {
 
         [Command("activity", RunMode = RunMode.Async)]
         public async Task Activity() {
-            var events = await _eventRetriever
-                .UserEvents()
-                .ToAsyncEnumerable()
-                .ToList();
+            var events = _eventRetriever.UserEvents();
             if (events.Any()) await Context.Channel.SendMessageAsync(FormatActivities(events));
             else await Context.Channel.SendMessageAsync("Could not find any activity.");
         }
 
-        private static string FormatActivities(IEnumerable<IUserEvent> events) => events.Aggregate(
-            $"__**Activities**__:{NewLine}```",
-            (a, c) => $"{a}{c.Username} {c.Action.ToString()} at {c.Time}{NewLine}"
-            , s => $"{s}```"
-        );
+        private static string FormatActivities(IEnumerable<IUserEvent> events)
+            => events
+                .OrderBy(e => e.Time)
+                .Aggregate(
+                    $"__**Activities**__:{NewLine}```",
+                    (a, c) => $"{a}{c.Username} {c.Action.ToString()} at {c.Time}{NewLine}"
+                    , s => $"{s}```"
+                );
 
         [Command("activity", RunMode = RunMode.Async)]
-        public async Task Activity([Summary("The user to get info for")] SocketUser user) {
-            var events = await _eventRetriever.UserEventsById(user.Id)
-                .ToAsyncEnumerable()
-                .ToList();
+        public async Task Activity([Summary("The user to get activity info for")] SocketUser user) {
+            var events = _eventRetriever.UserEventsById(user.Id);
             if (events.Any()) await Context.Channel.SendMessageAsync(FormatActivities(events));
             else await Context.Channel.SendMessageAsync($"Could not find activity for '{user.Username}'.");
         }
