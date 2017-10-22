@@ -50,7 +50,7 @@ namespace Botbin {
         private static async Task AddModules(CommandService commandService) {
             await commandService.AddModuleAsync<GiphyModule>();
             await commandService.AddModuleAsync<UserEventModule>();
-            await commandService.AddModuleAsync<InfoCommandModule>();
+            await commandService.AddModuleAsync<InfoModule>();
         }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {
