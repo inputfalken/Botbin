@@ -49,7 +49,7 @@ namespace Botbin.CommandCenters {
 
         [Command("save", RunMode = RunMode.Async)]
         public async Task Save() {
-            if (_settings.IsAdmin(Context.User.Id)) {
+            if (_settings.IsAdmin(Context.User)) {
                 var userEvents = await _eventRetriever
                     .UserEvents()
                     .ToAsyncEnumerable()
