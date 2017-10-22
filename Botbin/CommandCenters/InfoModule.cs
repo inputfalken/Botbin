@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Discord.Commands;
 
 namespace Botbin.CommandCenters {
-    public class InfoCommandModule : ModuleBase<SocketCommandContext> {
-        public InfoCommandModule(IServiceProvider provider) { }
+    public class InfoModule : ModuleBase<SocketCommandContext> {
+        public InfoModule(IServiceProvider provider) { }
 
         [Command("say")]
         [Summary("Echos a message.")]

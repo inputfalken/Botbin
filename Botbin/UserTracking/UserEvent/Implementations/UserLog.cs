@@ -26,7 +26,6 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
         public static IEnumerable<IUser> MapToUser(IEnumerable<IUser>users, IEnumerable<IUserEvent> userEvents) =>
             userEvents.Join(users, ue => ue.Id, u => u.Id, (ue, u) => u);
     }
-
     internal sealed class UserMessage : UserLog {
         public UserMessage(IUser user, UserAction type, string message) : base(user, type) => Message = message;
         public string Message { get; }
