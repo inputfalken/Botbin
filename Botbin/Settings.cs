@@ -8,8 +8,8 @@ namespace Botbin {
             CommandPrefix = commandPrefix;
             BotToken = botToken;
             AdminsIds = adminsIds == null
-                ? new List<ulong> {adminId}
-                : new List<ulong>(adminsIds) {adminId};
+                ? new HashSet<ulong> {adminId}
+                : new HashSet<ulong>(adminsIds) {adminId};
         }
 
         public Settings(char commandPrefix, string botToken, IUser admin, IEnumerable<IUser> admins = null) : this(
@@ -18,7 +18,7 @@ namespace Botbin {
         public char CommandPrefix { get; }
 
         public string BotToken { get; }
-        private List<ulong> AdminsIds { get; }
+        private HashSet<ulong> AdminsIds { get; }
 
         public bool IsAdmin(IUser user) => AdminsIds.Contains(user.Id);
 
