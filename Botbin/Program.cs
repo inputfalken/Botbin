@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Botbin.CommandCenters;
 using Botbin.Giphy;
@@ -18,6 +16,7 @@ namespace Botbin {
         private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
+            .AddSingleton<ILogger>(p => new JsonLinesTcpLogger(GetEnvironmentVariable("LOGSTASH_ADDRESS"), 5000, new ConsoleLogger()))
             .AddSingleton(p => new GiphyService(GetEnvironmentVariable("GIPHY_API_KEY", Process)))
             .AddSingleton(p =>
                 new Settings('~', GetEnvironmentVariable("DISCORD_BOT_TOKEN", Process), 318468838058360846)

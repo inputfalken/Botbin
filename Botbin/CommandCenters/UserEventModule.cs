@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Botbin.UserTracking;
 using Botbin.UserTracking.UserEvent;
@@ -11,6 +16,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using static System.Environment;
+using static Newtonsoft.Json.JsonConvert;
 
 namespace Botbin.CommandCenters {
     public class UserEventModule : ModuleBase<SocketCommandContext> {
@@ -49,10 +55,18 @@ namespace Botbin.CommandCenters {
         [Command("save", RunMode = RunMode.Async)]
         public async Task Save() {
             if (_settings.IsAdmin(Context.User)) {
-                var userEvents = _eventRetriever.UserEvents();
+                var userEvents = _eventRetriever.UserEvents().ToList();
+                using (var client = new TcpClient()) {
+                    client.Connect(IPAddress.Parse("192.168.99.100"), 5000);
+                    Thread.Sleep(200);
+                    var line = SerializeObject(userEvents) + "\n";
+                    using (var streamWriter = new StreamWriter(client.GetStream())) {
+                        streamWriter.Write(line);
+                    }
+                }
                 if (userEvents.Any()) {
-                    await File.WriteAllTextAsync(".\\history.json", JsonConvert.SerializeObject(userEvents));
-                    await Context.Channel.SendMessageAsync("Successfully saved content to disc.");
+                    await File.WriteAllTextAsync(".\\history.json", SerializeObject(userEvents));
+                    //await Context.Channel.SendMessageAsync("Successfully saved content to disc.");
                 }
                 else {
                     await Context.Channel.SendMessageAsync("No data available to save.");
