@@ -42,7 +42,7 @@ namespace Botbin.CommandCenters {
                 .OrderBy(e => e.Time)
                 .Aggregate(
                     $"__**{header}**__:{NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game.Name} at {c.Time}{NewLine}"
+                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Time}{NewLine}"
                     , s => $"{s}```"
                 );
 
