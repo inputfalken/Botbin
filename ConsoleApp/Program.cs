@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Botbin;
 using Botbin.CommandCenters;
 using Botbin.Giphy;
 using Botbin.UserTracking;
@@ -8,18 +9,17 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using static System.Environment;
-using static System.EnvironmentVariableTarget;
 
-namespace Botbin {
+namespace ConsoleApp {
     internal static class Program {
         private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
-            .AddSingleton<ILogger>(p => new JsonLinesTcpLogger(GetEnvironmentVariable("LOGSTASH_ADDRESS", Process), 5000, new ConsoleLogger()))
-            .AddSingleton(p => new GiphyService(GetEnvironmentVariable("GIPHY_API_KEY", Process)))
+            .AddSingleton<ILogger>(p =>
+                new JsonLinesTcpLogger(Environment.GetEnvironmentVariable("LOGSTASH_ADDRESS", EnvironmentVariableTarget.Process), 5000, new ConsoleLogger()))
+            .AddSingleton(p => new GiphyService(Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Process)))
             .AddSingleton(p =>
-                new Settings('~', GetEnvironmentVariable("DISCORD_BOT_TOKEN", Process), 318468838058360846)
+                new Settings('~', Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Process), 318468838058360846)
             )
             .AddSingleton(p => new ConcurrentInMemoryUserTracker(p))
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentInMemoryUserTracker>())

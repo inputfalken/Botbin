@@ -3,7 +3,7 @@ using System.Linq;
 using Discord;
 
 namespace Botbin {
-    internal class Settings {
+    public class Settings {
         public Settings(char commandPrefix, string botToken, ulong adminId, IEnumerable<ulong> adminsIds = null) {
             CommandPrefix = commandPrefix;
             BotToken = botToken;

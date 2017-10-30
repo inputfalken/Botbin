@@ -4,7 +4,6 @@ using System.Linq;
 using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
 using Newtonsoft.Json;
-using static Botbin.UserTracking.UserEvent.Enums.UserAction;
 
 namespace Botbin.UserTracking.UserEvent.Implementations {
     internal class UserLog : IUserEvent {
@@ -36,7 +35,7 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
     internal sealed class UserMessage : UserLog {
         public UserMessage(IUser user, UserAction type, string message) : base(user, type) => Message = message;
 
-        public UserMessage(IMessage message) : base(message.Author, SendMessage) {
+        public UserMessage(IMessage message) : base(message.Author, UserAction.SendMessage) {
             Message = message.Content;
             Channel = message.Channel.Name;
         }

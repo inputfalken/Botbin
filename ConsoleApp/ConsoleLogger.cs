@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Discord;
+using Botbin;
 
-namespace Botbin {
-    class ConsoleLogger : ILogger {
+namespace ConsoleApp {
+    public class ConsoleLogger : ILogger {
         public void Log(string log) {
             Console.WriteLine(log);
         }

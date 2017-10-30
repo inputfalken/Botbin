@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Botbin", "Botbin\Botbin.csproj", "{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Botbin", "Botbin\Botbin.csproj", "{1D7AF386-ED82-4151-A4C4-47486F8C19EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EACC30B0-4478-41D6-BE78-8CBFA9FF511D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D7AF386-ED82-4151-A4C4-47486F8C19EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D7AF386-ED82-4151-A4C4-47486F8C19EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D7AF386-ED82-4151-A4C4-47486F8C19EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D7AF386-ED82-4151-A4C4-47486F8C19EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

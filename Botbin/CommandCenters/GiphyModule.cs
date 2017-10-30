@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Botbin.Giphy;
-using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,8 +18,8 @@ namespace Botbin.CommandCenters {
                 await Context.Channel.SendMessageAsync(link);
             }
             catch (Exception e) {
-                await Program.Log(new LogMessage(LogSeverity.Error, "Method WtfAsync",
-                    "Failed to deserialize an anonymous type", e));
+                //await Program.Log(new LogMessage(LogSeverity.Error, "Method WtfAsync",
+                //    "Failed to deserialize an anonymous type", e));
                 var errorResponse =
                     $"Oops, could not find a GIF for '{message}', try again with a different string.";
                 await Context.Channel.SendMessageAsync(errorResponse);

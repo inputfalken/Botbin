@@ -1,10 +1,10 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using static Newtonsoft.Json.JsonConvert;
+using Newtonsoft.Json;
 
 namespace Botbin.Giphy {
-    internal class GiphyService {
+    public class GiphyService {
         private readonly Uri _baseUri = new Uri("https://api.giphy.com", UriKind.Absolute);
         private readonly HttpClient _client = new HttpClient();
         private readonly string _key;
@@ -22,7 +22,7 @@ namespace Botbin.Giphy {
                 $"/v1/gifs/translate?api_key={_key}&s={term}"));
 
         private async Task<Uri> RequestGif(Uri uri) => new Uri(
-            DeserializeAnonymousType(
+            JsonConvert.DeserializeAnonymousType(
                 await _client.GetStringAsync(uri)
                 , new {data = new {url = string.Empty}}
             ).data.url, UriKind.Absolute

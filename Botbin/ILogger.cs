@@ -1,7 +1,5 @@
-﻿using System.Threading.Tasks;
-
-namespace Botbin {
-    interface ILogger {
+﻿namespace Botbin {
+    public interface ILogger {
         void Log(string log);
     }
 }

@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Environment;
-using static System.Net.Sockets.SocketFlags;
-using static System.Text.Encoding;
 
 namespace Botbin.UserTracking.Implementations {
-    internal class JsonLinesTcpLogger : ILogger, IDisposable {
+    public class JsonLinesTcpLogger : ILogger, IDisposable {
         private readonly string _address;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ILogger _exceptionLogger;
@@ -69,7 +67,9 @@ namespace Botbin.UserTracking.Implementations {
             }
         }
 
-        private async Task Send(string message) =>
-            await _client.Client.SendAsync(UTF8.GetBytes(message + NewLine), None);
+        private async Task Send(string message) {
+            var buffer = Encoding.UTF8.GetBytes(message + Environment.NewLine);
+            await _client.Client.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Length), SocketFlags.None);
+        }
     }
 }

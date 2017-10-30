@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Botbin.UserTracking.UserEvent.Enums {
+﻿namespace Botbin.UserTracking.UserEvent.Enums {
     public enum UserAction {
-        [Display(Name = "Start Game")] StartGame = 0,
-        [Display(Name = "Quit Game")] QuitGame = 1,
-        [Display(Name = "Logged Off")] LogOff = 2,
-        [Display(Name = "Logged In")] LogIn = 3,
-        [Display(Name = "Sent Message")] SendMessage = 4
+        StartGame = 0,
+        QuitGame = 1,
+        LogOff = 2,
+        LogIn = 3,
+        SendMessage = 4
     }
 }

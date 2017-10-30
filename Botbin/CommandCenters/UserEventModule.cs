@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Botbin.UserTracking;
@@ -15,8 +13,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using static System.Environment;
-using static Newtonsoft.Json.JsonConvert;
 
 namespace Botbin.CommandCenters {
     public class UserEventModule : ModuleBase<SocketCommandContext> {
@@ -32,8 +28,8 @@ namespace Botbin.CommandCenters {
             => events
                 .OrderBy(e => e.Time)
                 .Aggregate(
-                    $"__**{header}**__:{NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} at {c.Time}{NewLine}"
+                    $"__**{header}**__:{Environment.NewLine}```",
+                    (a, c) => $"{a}{c.Username} {c.Action} at {c.Time}{Environment.NewLine}"
                     , s => $"{s}```"
                 );
 
@@ -41,8 +37,8 @@ namespace Botbin.CommandCenters {
             => events
                 .OrderBy(e => e.Time)
                 .Aggregate(
-                    $"__**{header}**__:{NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Time}{NewLine}"
+                    $"__**{header}**__:{Environment.NewLine}```",
+                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Time}{Environment.NewLine}"
                     , s => $"{s}```"
                 );
 
@@ -86,13 +82,13 @@ namespace Botbin.CommandCenters {
                 using (var client = new TcpClient()) {
                     client.Connect(IPAddress.Parse("192.168.99.100"), 5000);
                     Thread.Sleep(200);
-                    var line = SerializeObject(userEvents) + "\n";
+                    var line = JsonConvert.SerializeObject(userEvents) + "\n";
                     using (var streamWriter = new StreamWriter(client.GetStream())) {
                         streamWriter.Write(line);
                     }
                 }
                 if (userEvents.Any()) {
-                    await File.WriteAllTextAsync(".\\history.json", SerializeObject(userEvents));
+                    //await File.WriteAllTextAsync(".\\history.json", JsonConvert.SerializeObject(userEvents));
                     //await Context.Channel.SendMessageAsync("Successfully saved content to disc.");
                 }
                 else {

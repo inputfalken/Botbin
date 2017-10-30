@@ -4,16 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking.UserEvent;
+using Botbin.UserTracking.UserEvent.Enums;
 using Botbin.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using static System.Threading.Tasks.Task;
-using static Botbin.UserTracking.UserEvent.Enums.UserAction;
-using static Discord.UserStatus;
 
 namespace Botbin.UserTracking.Implementations {
-    internal class ConcurrentInMemoryUserTracker : IUserListener, IUserEventRetriever {
+    public class ConcurrentInMemoryUserTracker : IUserListener, IUserEventRetriever {
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
         private readonly ILogger _logger;
         private readonly Settings _settings;
@@ -30,34 +28,34 @@ namespace Botbin.UserTracking.Implementations {
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
         public Task ListenForGames(IUser before, IUser after) {
-            if (NotHuman(before)) return CompletedTask;
+            if (NotHuman(before)) return Task.CompletedTask;
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
             UserLog userLog;
-            if (startGame) userLog = new UserGame(before, StartGame, after.Game.Value);
-            else if (quitGame) userLog = new UserGame(after, QuitGame, before.Game.Value);
-            else return CompletedTask;
+            if (startGame) userLog = new UserGame(before, UserAction.StartGame, after.Game.Value);
+            else if (quitGame) userLog = new UserGame(after, UserAction.QuitGame, before.Game.Value);
+            else return Task.CompletedTask;
             Save(userLog);
             _logger.Log(JsonConvert.SerializeObject(userLog));
-            return CompletedTask;
+            return Task.CompletedTask;
         }
 
         public Task ListenForLoginsAndLogOuts(IUser before, IUser after) {
-            if (NotHuman(before)) return CompletedTask;
-            var logIn = before.Status == Offline && after.Status == Online;
-            var logOff = before.Status == Online && after.Status == Offline;
+            if (NotHuman(before)) return Task.CompletedTask;
+            var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
+            var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
             UserLog userLog;
-            if (logIn) userLog = new UserLog(after, LogIn);
-            else if (logOff) userLog = new UserLog(after, LogOff);
-            else return CompletedTask;
+            if (logIn) userLog = new UserLog(after, UserAction.LogIn);
+            else if (logOff) userLog = new UserLog(after, UserAction.LogOff);
+            else return Task.CompletedTask;
             Save(userLog);
             _logger.Log(JsonConvert.SerializeObject(userLog));
-            return CompletedTask;
+            return Task.CompletedTask;
         }
 
         public Task ListenForMessages(IMessage message) {
             var author = message.Author;
-            if (NotHuman(author) || Command(message.Content)) return CompletedTask;
+            if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
             var user = new UserMessage(message);
             _logger.Log(JsonConvert.SerializeObject(user));
 
@@ -73,10 +71,10 @@ namespace Botbin.UserTracking.Implementations {
                     return queue;
                 }
             );
-            return CompletedTask;
+            return Task.CompletedTask;
         }
 
-        private bool Command(string message) => message.StartsWith(_settings.CommandPrefix);
+        private bool Command(string message) => message.StartsWith(_settings.CommandPrefix.ToString());
 
         private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
 
