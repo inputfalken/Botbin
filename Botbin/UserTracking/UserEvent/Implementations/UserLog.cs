@@ -26,13 +26,20 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
         public static IEnumerable<IUser> MapToUser(IEnumerable<IUser>users, IEnumerable<IUserEvent> userEvents) =>
             userEvents.Join(users, ue => ue.Id, u => u.Id, (ue, u) => u);
     }
+
     internal sealed class UserMessage : UserLog {
-        public UserMessage(IUser user, UserAction type, string message) : base(user, type) => Message = message;
+        public UserMessage(IMessage message) : base(message.Author, UserAction.SendMessage) {
+            Message = message.Content;
+            Channel = message.Channel.Name;
+        }
+
         public string Message { get; }
+        public string Channel { get; }
     }
 
     internal sealed class UserGame : UserLog {
-        public UserGame(IUser user, UserAction type, Game game) : base(user, type) => Game = game;
-        public Game Game { get; }
+        public UserGame(IUser user, UserAction type, Game game) : base(user, type) => Game = game.Name;
+
+        public string Game { get; }
     }
 }
