@@ -64,6 +64,7 @@ namespace Botbin.UserTracking.Implementations {
             if (!_connected) {
                 await _client.ConnectAsync(_address, _port).ConfigureAwait(false);
                 _connected = true;
+                _exceptionLogger.Log($"Successfully Connected to '{_address}:{_port}'.");
             }
         }
 
