@@ -7,23 +7,25 @@ using System.Threading.Tasks;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Botbin.UserTracking.Implementations {
-    public class JsonLinesTcpLogger : ILogger, IDisposable {
+    public class JsonTcpLogger : ILogger, IDisposable {
         private readonly string _address;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly TcpClient _client;
         private readonly ILogger _exceptionLogger;
         private readonly int _port;
         private readonly BlockingCollection<string> _queue;
         private readonly Task _writeTask;
-        private TcpClient _client;
-        private bool _connected;
+        private bool _disconnected ;
 
-        public JsonLinesTcpLogger(string address, int port, ILogger exceptionLogger) {
+        public JsonTcpLogger(string address, int port, ILogger exceptionLogger) {
             _address = address;
             _port = port;
             _exceptionLogger = exceptionLogger;
             _queue = new BlockingCollection<string>();
             _writeTask = Task.Run(Write);
             _cancellationTokenSource = new CancellationTokenSource();
+            _client = new TcpClient();
+            _disconnected = true;
         }
 
         public void Dispose() {
@@ -42,7 +44,7 @@ namespace Botbin.UserTracking.Implementations {
                 item = item ?? _queue.Take(_cancellationTokenSource.Token);
                 if (item == null) continue;
                 try {
-                    await Connect();
+                    if (_disconnected) await Connect();
                     await Send(item);
                     item = null;
                 }
@@ -55,18 +57,14 @@ namespace Botbin.UserTracking.Implementations {
         private async Task HandleException(Exception e) {
             _exceptionLogger.Log(e.Message);
             await Task.Delay(1000).ConfigureAwait(false);
-            _client?.Dispose();
-            _client = null;
-            _connected = false;
+            _client.Dispose();
+            _disconnected = true;
         }
 
         private async Task Connect() {
-            _client = _client ?? new TcpClient();
-            if (!_connected) {
-                await _client.ConnectAsync(_address, _port).ConfigureAwait(false);
-                _connected = true;
-                _exceptionLogger.Log($"Successfully Connected to '{_address}:{_port}'.");
-            }
+            await _client.ConnectAsync(_address, _port).ConfigureAwait(false);
+            _disconnected = false;
+            _exceptionLogger.Log($"Successfully Connected to '{_address}:{_port}'.");
         }
 
         private async Task Send(string message) {

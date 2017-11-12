@@ -16,7 +16,7 @@ namespace ConsoleApp {
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton<ILogger>(p =>
-                new JsonLinesTcpLogger(Environment.GetEnvironmentVariable("LOGSTASH_ADDRESS", EnvironmentVariableTarget.Process), 5000, new ConsoleLogger()))
+                new JsonTcpLogger(Environment.GetEnvironmentVariable("LOGSTASH_ADDRESS", EnvironmentVariableTarget.Process), 5000, new ConsoleLogger()))
             .AddSingleton(p => new GiphyService(Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Process)))
             .AddSingleton(p =>
                 new Settings('~', Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Process), 318468838058360846)

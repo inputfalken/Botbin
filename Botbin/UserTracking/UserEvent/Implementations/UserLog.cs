@@ -12,9 +12,13 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
             Action = type;
             Id = user.Id;
             Username = user.Username;
+            Status = user.Status;
         }
 
         public UserLog(IUser user, UserAction type) : this(user, DateTime.Now, type) { }
+
+        [JsonProperty("status")]
+        public UserStatus Status { get; }
 
         [JsonProperty("time")]
         public DateTime Time { get; }
