@@ -35,7 +35,8 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
     internal sealed class UserMessage : UserLog {
         public UserMessage(IUser user, UserAction type, string message) : base(user, type) => Message = message;
 
-        public UserMessage(IMessage message) : base(message.Author, UserAction.SendMessage) {
+        public UserMessage(IMessage message) :
+            base(message.Author, message.CreatedAt.DateTime, UserAction.SendMessage) {
             Message = message.Content;
             Channel = message.Channel.Name;
         }
