@@ -35,8 +35,8 @@ namespace Botbin.UserTracking.Implementations {
             if (startGame) userLog = new UserGame(before, UserAction.StartGame, after.Game.Value);
             else if (quitGame) userLog = new UserGame(after, UserAction.QuitGame, before.Game.Value);
             else return Task.CompletedTask;
+
             Save(userLog);
-            _logger.Log(userLog);
             return Task.CompletedTask;
         }
 
@@ -48,8 +48,8 @@ namespace Botbin.UserTracking.Implementations {
             if (logIn) userLog = new UserLog(after, UserAction.LogIn);
             else if (logOff) userLog = new UserLog(after, UserAction.LogOff);
             else return Task.CompletedTask;
+
             Save(userLog);
-            _logger.Log(userLog);
             return Task.CompletedTask;
         }
 
@@ -57,20 +57,7 @@ namespace Botbin.UserTracking.Implementations {
             var author = message.Author;
             if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
             var user = new UserMessage(message);
-            _logger.Log(JsonConvert.SerializeObject(user));
-
-            _dictionary.AddOrUpdate(
-                user.Id,
-                _ => {
-                    var concurrentQueue = new ConcurrentQueue<IUserEvent>();
-                    concurrentQueue.Enqueue(user);
-                    return concurrentQueue;
-                },
-                (_, queue) => {
-                    queue.Enqueue(user);
-                    return queue;
-                }
-            );
+            Save(user);
             return Task.CompletedTask;
         }
 
@@ -78,12 +65,14 @@ namespace Botbin.UserTracking.Implementations {
 
         private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
 
-        private void Save(IUserEvent user) =>
+        private void Save(IUserEvent user) {
+            _logger.Log(user);
             _dictionary.AddOrUpdate(
                 user.Id,
                 _ => NewKey(user),
                 (_, queue) => Update(user, queue)
             );
+        }
 
         private static ConcurrentQueue<IUserEvent> NewKey(IUserEvent user) =>
             Update(user, new ConcurrentQueue<IUserEvent>());
