@@ -21,9 +21,9 @@ namespace ConsoleApp {
             .AddSingleton(p =>
                 new Settings('~', Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Process), 318468838058360846)
             )
-            .AddSingleton(p => new ConcurrentInMemoryUserTracker(p))
-            .AddSingleton<IUserListener>(p => p.GetService<ConcurrentInMemoryUserTracker>())
-            .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentInMemoryUserTracker>())
+            .AddSingleton(p => new ConcurrentUserTracker(p))
+            .AddSingleton<IUserListener>(p => p.GetService<ConcurrentUserTracker>())
+            .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentUserTracker>())
             .BuildServiceProvider();
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();

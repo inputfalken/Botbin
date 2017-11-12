@@ -11,12 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace Botbin.UserTracking.Implementations {
-    public class ConcurrentInMemoryUserTracker : IUserListener, IUserEventRetriever {
+    public class ConcurrentUserTracker : IUserListener, IUserEventRetriever {
         private readonly ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>> _dictionary;
         private readonly ILogger _logger;
         private readonly Settings _settings;
 
-        public ConcurrentInMemoryUserTracker(IServiceProvider provider) {
+        public ConcurrentUserTracker(IServiceProvider provider) {
             _dictionary = new ConcurrentDictionary<ulong, ConcurrentQueue<IUserEvent>>();
             _settings = provider.GetService<Settings>();
             _logger = provider.GetService<ILogger>();
