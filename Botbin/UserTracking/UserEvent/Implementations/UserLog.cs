@@ -4,6 +4,7 @@ using System.Linq;
 using Botbin.UserTracking.UserEvent.Enums;
 using Discord;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Botbin.UserTracking.UserEvent.Implementations {
     internal class UserLog : IUserEvent {
@@ -18,12 +19,14 @@ namespace Botbin.UserTracking.UserEvent.Implementations {
         public UserLog(IUser user, UserAction type) : this(user, DateTime.Now, type) { }
 
         [JsonProperty("status")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public UserStatus Status { get; }
 
         [JsonProperty("time")]
         public DateTime Time { get; }
 
         [JsonProperty("action")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public UserAction Action { get; }
 
         [JsonProperty("id")]
