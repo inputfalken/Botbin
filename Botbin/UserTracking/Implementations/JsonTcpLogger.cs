@@ -15,7 +15,7 @@ namespace Botbin.UserTracking.Implementations {
         private readonly int _port;
         private readonly BlockingCollection<string> _queue;
         private readonly Task _writeTask;
-        private bool _disconnected ;
+        private bool _disconnected;
 
         public JsonTcpLogger(string address, int port, ILogger exceptionLogger) {
             _address = address;
