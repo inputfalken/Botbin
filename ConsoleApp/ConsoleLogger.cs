@@ -3,8 +3,8 @@ using Botbin;
 
 namespace ConsoleApp {
     public class ConsoleLogger : ILogger {
-        public void Log(string log) {
-            Console.WriteLine(log);
+        public void Log<T>(T item) {
+            Console.WriteLine(item.ToString());
         }
     }
 }

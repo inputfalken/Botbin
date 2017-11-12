@@ -36,7 +36,7 @@ namespace Botbin.UserTracking.Implementations {
             else if (quitGame) userLog = new UserGame(after, UserAction.QuitGame, before.Game.Value);
             else return Task.CompletedTask;
             Save(userLog);
-            _logger.Log(JsonConvert.SerializeObject(userLog));
+            _logger.Log(userLog);
             return Task.CompletedTask;
         }
 
@@ -49,7 +49,7 @@ namespace Botbin.UserTracking.Implementations {
             else if (logOff) userLog = new UserLog(after, UserAction.LogOff);
             else return Task.CompletedTask;
             Save(userLog);
-            _logger.Log(JsonConvert.SerializeObject(userLog));
+            _logger.Log(userLog);
             return Task.CompletedTask;
         }
 

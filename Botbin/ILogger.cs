@@ -1,5 +1,5 @@
 ﻿namespace Botbin {
     public interface ILogger {
-        void Log(string log);
+        void Log<T>(T item);
     }
 }
