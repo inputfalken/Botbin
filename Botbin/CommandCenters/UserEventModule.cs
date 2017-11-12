@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using Botbin.UserTracking;
 using Botbin.UserTracking.UserEvent;
@@ -12,7 +8,7 @@ using Botbin.UserTracking.UserEvent.Implementations;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using static System.Environment;
 
 namespace Botbin.CommandCenters {
     public class UserEventModule : ModuleBase<SocketCommandContext> {
@@ -28,8 +24,8 @@ namespace Botbin.CommandCenters {
             => events
                 .OrderBy(e => e.Time)
                 .Aggregate(
-                    $"__**{header}**__:{Environment.NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} at {c.Time}{Environment.NewLine}"
+                    $"__**{header}**__:{NewLine}```",
+                    (a, c) => $"{a}{c.Username} {c.Action} at {c.Time}{NewLine}"
                     , s => $"{s}```"
                 );
 
@@ -37,8 +33,8 @@ namespace Botbin.CommandCenters {
             => events
                 .OrderBy(e => e.Time)
                 .Aggregate(
-                    $"__**{header}**__:{Environment.NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Time}{Environment.NewLine}"
+                    $"__**{header}**__:{NewLine}```",
+                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Time}{NewLine}"
                     , s => $"{s}```"
                 );
 
@@ -49,7 +45,8 @@ namespace Botbin.CommandCenters {
                 .UserEventsById(user.Id)
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .OrderBy(game => game.Time);
+                .OrderBy(game => game.Time)
+                .ToList();
 
             if (userGames.Any())
                 await Context.Channel.SendMessageAsync(FormatGameHistory(
@@ -69,47 +66,27 @@ namespace Botbin.CommandCenters {
                 .UserEvents()
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .OrderBy(game => game.Time);
+                .OrderBy(game => game.Time)
+                .ToList();
 
             if (userGames.Any()) await Context.Channel.SendMessageAsync(FormatGameHistory(userGames));
             else await Context.Channel.SendMessageAsync("No game history found.");
         }
 
-        [Command("save", RunMode = RunMode.Async)]
-        public async Task Save() {
-            if (_settings.IsAdmin(Context.User)) {
-                var userEvents = _eventRetriever.UserEvents().ToList();
-                using (var client = new TcpClient()) {
-                    client.Connect(IPAddress.Parse("192.168.99.100"), 5000);
-                    Thread.Sleep(200);
-                    var line = JsonConvert.SerializeObject(userEvents) + "\n";
-                    using (var streamWriter = new StreamWriter(client.GetStream())) {
-                        streamWriter.Write(line);
-                    }
-                }
-                if (userEvents.Any()) {
-                    //await File.WriteAllTextAsync(".\\history.json", JsonConvert.SerializeObject(userEvents));
-                    //await Context.Channel.SendMessageAsync("Successfully saved content to disc.");
-                }
-                else {
-                    await Context.Channel.SendMessageAsync("No data available to save.");
-                }
-            }
-            else {
-                await Context.Channel.SendMessageAsync("Pfft, i wont save this. You are not the boss of me!");
-            }
-        }
-
         [Command("activity", RunMode = RunMode.Async)]
         public async Task Activity() {
-            var events = _eventRetriever.UserEvents();
+            var events = _eventRetriever
+                .UserEvents()
+                .ToList();
             if (events.Any()) await Context.Channel.SendMessageAsync(FormatActivities(events));
             else await Context.Channel.SendMessageAsync("Could not find any activity.");
         }
 
         [Command("activity", RunMode = RunMode.Async)]
         public async Task Activity([Summary("The user to get activity info for")] SocketUser user) {
-            var events = _eventRetriever.UserEventsById(user.Id);
+            var events = _eventRetriever
+                .UserEventsById(user.Id)
+                .ToList();
             if (events.Any())
                 await Context.Channel.SendMessageAsync(FormatActivities(events, $"Activities for '{user.Username}'"));
             else await Context.Channel.SendMessageAsync($"Could not find activity for '{user.Username}'.");
