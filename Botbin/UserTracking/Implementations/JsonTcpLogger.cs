@@ -10,7 +10,7 @@ namespace Botbin.UserTracking.Implementations {
     public class JsonTcpLogger : ILogger, IDisposable {
         private readonly string _address;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly TcpClient _client;
+        private TcpClient _client;
         private readonly ILogger _exceptionLogger;
         private readonly int _port;
         private readonly BlockingCollection<string> _queue;
@@ -44,7 +44,11 @@ namespace Botbin.UserTracking.Implementations {
                 item = item ?? _queue.Take(_cancellationTokenSource.Token);
                 if (item == null) continue;
                 try {
-                    if (_disconnected) await Connect();
+                    if (_disconnected) {
+                        await _client.ConnectAsync(_address, _port).ConfigureAwait(false);
+                        _disconnected = false;
+                        _exceptionLogger.Log($"Successfully Connected to '{_address}:{_port}'.");
+                    }
                     await Send(item);
                     item = null;
                 }
@@ -55,16 +59,13 @@ namespace Botbin.UserTracking.Implementations {
         }
 
         private async Task HandleException(Exception e) {
-            _exceptionLogger.Log(e.Message);
+            _exceptionLogger.Log(e);
             await Task.Delay(1000).ConfigureAwait(false);
-            _client.Dispose();
+            // Close calls dispose
+            _client.Close();
+            _client = new TcpClient();
             _disconnected = true;
-        }
 
-        private async Task Connect() {
-            await _client.ConnectAsync(_address, _port).ConfigureAwait(false);
-            _disconnected = false;
-            _exceptionLogger.Log($"Successfully Connected to '{_address}:{_port}'.");
         }
 
         private async Task Send(string message) {
