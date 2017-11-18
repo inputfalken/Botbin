@@ -8,7 +8,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Botbin.UserTracking.UserEvent.Implementations {
     internal class UserLog : IUserEvent {
-        public UserLog(IUser user, DateTime time, UserAction type) {
+        internal UserLog(IUser user, DateTime time, UserAction type) {
             Time = time;
             Action = type;
             Id = user.Id;

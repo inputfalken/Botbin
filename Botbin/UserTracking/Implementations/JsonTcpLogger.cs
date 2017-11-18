@@ -10,11 +10,11 @@ namespace Botbin.UserTracking.Implementations {
     public class JsonTcpLogger : ILogger, IDisposable {
         private readonly string _address;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private TcpClient _client;
         private readonly ILogger _exceptionLogger;
         private readonly int _port;
         private readonly BlockingCollection<string> _queue;
         private readonly Task _writeTask;
+        private TcpClient _client;
         private bool _disconnected;
 
         public JsonTcpLogger(string address, int port, ILogger exceptionLogger) {
@@ -65,7 +65,6 @@ namespace Botbin.UserTracking.Implementations {
             _client.Close();
             _client = new TcpClient();
             _disconnected = true;
-
         }
 
         private async Task Send(string message) {

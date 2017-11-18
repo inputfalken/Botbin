@@ -8,7 +8,6 @@ using Botbin.UserTracking.UserEvent.Enums;
 using Botbin.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 
 namespace Botbin.UserTracking.Implementations {
     public class ConcurrentUserTracker : IUserListener, IUserEventRetriever {
