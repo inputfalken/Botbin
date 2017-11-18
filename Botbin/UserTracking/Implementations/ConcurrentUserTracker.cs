@@ -51,7 +51,7 @@ namespace Botbin.UserTracking.Implementations {
         public Task ListenForStatus(IUser before, IUser after) {
             if (NotHuman(before)) return Task.CompletedTask;
             // There is probably much more states to take into account for proper tracking. :)
-            // Tracking invis cant be done since argumens `before` and `after` understands it as going online/offline.
+            // Tracking invis cant be done since arguments `before` and `after` understands it as going online/offline.
             if (before.Status != AFK && after.Status == AFK)
                 Save(new UserLog(after, AwayFromKeyBoardEnabled));
             if (before.Status == AFK && after.Status != AFK)
@@ -64,8 +64,10 @@ namespace Botbin.UserTracking.Implementations {
                 Save(new UserLog(after, IdleEnabled));
             if (before.Status == Idle && after.Status != Idle)
                 Save(new UserLog(after, IdleDisabled));
-            if (before.Status != Online && after.Status == Online)
+            // Logging on automatically makes you in online state.
+            if (before.Status == Offline && after.Status == Online)
                 Save(new UserLog(after, LogIn));
+            // Just going offline from any state means you logged off.
             if (before.Status != Offline && after.Status == Offline)
                 Save(new UserLog(after, LogOff));
 
