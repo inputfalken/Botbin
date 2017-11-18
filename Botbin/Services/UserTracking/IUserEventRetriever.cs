@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Botbin.UserTracking.UserEvent;
+using Botbin.Services.UserTracking.UserEvent;
 
-namespace Botbin.UserTracking {
+namespace Botbin.Services.UserTracking {
     public interface IUserEventRetriever {
         IEnumerable<IUserEvent> UserEventsById(ulong id);
         IEnumerable<IUserEvent> UserEvents();

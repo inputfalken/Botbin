@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.2" />
+    <PackageReference Include="Optional" Version="3.2.0" />
   </ItemGroup>
 
 </Project>

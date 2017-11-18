@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Botbin.UserTracking;
-using Botbin.UserTracking.UserEvent;
-using Botbin.UserTracking.UserEvent.Implementations;
+using Botbin.Services.UserTracking;
+using Botbin.Services.UserTracking.UserEvent;
+using Botbin.Services.UserTracking.UserEvent.Implementations;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;

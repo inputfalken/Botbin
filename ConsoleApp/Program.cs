@@ -2,9 +2,10 @@
 using System.Threading.Tasks;
 using Botbin;
 using Botbin.CommandCenters;
-using Botbin.Giphy;
-using Botbin.UserTracking;
-using Botbin.UserTracking.Implementations;
+using Botbin.Services;
+using Botbin.Services.Interfaces;
+using Botbin.Services.UserTracking;
+using Botbin.Services.UserTracking.Implementations;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -19,13 +20,15 @@ namespace ConsoleApp {
         private const char CommandPrefix = '~';
         private const string TcpAddress = "LOGSTASH_ADDRESS";
         private const string GiphyApiKey = "GIPHY_API_KEY";
+        private const int Port = 5000;
 
         private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
+            .AddSingleton<IRandomizer>(p => new Randomizer(new Random()))
             .AddSingleton<ILogger>(p =>
-                new JsonTcpLogger(GetEnvironmentVariable(TcpAddress, Process), 5000, new ConsoleLogger()))
-            .AddSingleton(p => new GiphyService(GetEnvironmentVariable(GiphyApiKey, Process)))
+                new JsonTcpLogger(GetEnvironmentVariable(TcpAddress, Process), Port, new ConsoleLogger()))
+            .AddSingleton<IGifProvider>(p => new Giphy(GetEnvironmentVariable(GiphyApiKey, Process)))
             .AddSingleton(p => new Settings(CommandPrefix, GetEnvironmentVariable(BotToken, Process), AdminId))
             .AddSingleton(p => new ConcurrentUserTracker(p))
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentUserTracker>())
@@ -53,7 +56,7 @@ namespace ConsoleApp {
         }
 
         private static async Task AddModules(CommandService commandService) {
-            await commandService.AddModuleAsync<GiphyModule>();
+            await commandService.AddModuleAsync<GifModule>();
             await commandService.AddModuleAsync<UserEventModule>();
             await commandService.AddModuleAsync<InfoModule>();
             await commandService.AddModuleAsync<RandomizerModule>();

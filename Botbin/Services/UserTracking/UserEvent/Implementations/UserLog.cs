@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Botbin.UserTracking.UserEvent.Enums;
+using Botbin.Services.UserTracking.UserEvent.Enums;
 using Discord;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Botbin.UserTracking.UserEvent.Implementations {
+namespace Botbin.Services.UserTracking.UserEvent.Implementations {
     internal class UserLog : IUserEvent {
         internal UserLog(IUser user, DateTime time, UserAction type) {
             Time = time;

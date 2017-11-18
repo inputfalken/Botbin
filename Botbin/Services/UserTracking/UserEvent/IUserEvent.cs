@@ -1,7 +1,7 @@
 ﻿using System;
-using Botbin.UserTracking.UserEvent.Enums;
+using Botbin.Services.UserTracking.UserEvent.Enums;
 
-namespace Botbin.UserTracking.UserEvent {
+namespace Botbin.Services.UserTracking.UserEvent {
     public interface IUserEvent {
         ulong Id { get; }
         DateTime Time { get; }

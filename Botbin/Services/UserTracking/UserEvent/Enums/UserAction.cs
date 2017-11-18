@@ -1,4 +1,4 @@
-﻿namespace Botbin.UserTracking.UserEvent.Enums {
+﻿namespace Botbin.Services.UserTracking.UserEvent.Enums {
     public enum UserAction {
         StartGame = 0,
         QuitGame = 1,

@@ -1,18 +1,16 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Botbin.Services.Interfaces;
 using Newtonsoft.Json;
 
-namespace Botbin.Giphy {
-    public class GiphyService {
+namespace Botbin.Services {
+    public class Giphy : IGifProvider {
         private readonly Uri _baseUri = new Uri("https://api.giphy.com", UriKind.Absolute);
         private readonly HttpClient _client = new HttpClient();
         private readonly string _key;
 
-        public GiphyService(string key) => _key = key;
-
-        public Task<Uri> RandomWithTag(string tag) =>
-            RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag={tag}&rating=R"));
+        public Giphy(string key) => _key = key;
 
         public Task<Uri> Random() =>
             RequestGif(new Uri(_baseUri, $"v1/gifs/random?api_key={_key}&tag=&rating=R"));

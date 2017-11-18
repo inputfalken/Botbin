@@ -1,15 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Discord.Commands;
 
 namespace Botbin.CommandCenters {
     public class InfoModule : ModuleBase<SocketCommandContext> {
         public InfoModule(IServiceProvider provider) { }
-
-        [Command("say")]
-        [Summary("Echos a message.")]
-        public async Task SayAsync([Remainder] [Summary("The text to echo")] string echo) =>
-            await Context.Channel.SendMessageAsync(echo);
 
         [Command("days")]
         [Summary("Displays how many days the account has existed.")]
@@ -18,6 +14,11 @@ namespace Botbin.CommandCenters {
 
             await Context.Channel.SendMessageAsync(
                 $"Your account is {daysOfExistance} {(daysOfExistance == 1 ? "day" : "days")} old.");
+        }
+
+        [Command("uptime")]
+        public async Task Uptime() {
+            await ReplyAsync((DateTime.Now - Process.GetCurrentProcess().StartTime).ToString("G"));
         }
     }
 }

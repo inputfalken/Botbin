@@ -4,9 +4,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Newtonsoft.Json.JsonConvert;
+using Botbin.Services.Interfaces;
+using Newtonsoft.Json;
 
-namespace Botbin.UserTracking.Implementations {
+namespace Botbin.Services {
     public class JsonTcpLogger : ILogger, IDisposable {
         private readonly string _address;
         private readonly CancellationTokenSource _cancellationTokenSource;
@@ -36,7 +37,7 @@ namespace Botbin.UserTracking.Implementations {
             _cancellationTokenSource?.Dispose();
         }
 
-        public void Log<T>(T item) => _queue.Add(SerializeObject(item));
+        public void Log<T>(T item) => _queue.Add(JsonConvert.SerializeObject(item));
 
         private async Task Write() {
             string item = null;

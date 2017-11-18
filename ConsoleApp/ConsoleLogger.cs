@@ -1,5 +1,6 @@
 ﻿using System;
 using Botbin;
+using Botbin.Services.Interfaces;
 
 namespace ConsoleApp {
     public class ConsoleLogger : ILogger {
