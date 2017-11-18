@@ -8,6 +8,7 @@ using Botbin.UserTracking.UserEvent.Enums;
 using Botbin.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using static Discord.UserStatus;
 
 namespace Botbin.UserTracking.Implementations {
     public class ConcurrentUserTracker : IUserListener, IUserEventRetriever {
@@ -22,7 +23,7 @@ namespace Botbin.UserTracking.Implementations {
         }
 
         public IEnumerable<IUserEvent> UserEventsById(ulong id) =>
-            _dictionary.TryGetValue(id, out var result) ? result : Enumerable.Empty<IUserEvent>();
+            !_dictionary.TryGetValue(id, out var result) ? Enumerable.Empty<IUserEvent>() : result;
 
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
@@ -41,8 +42,8 @@ namespace Botbin.UserTracking.Implementations {
 
         public Task ListenForLoginsAndLogOuts(IUser before, IUser after) {
             if (NotHuman(before)) return Task.CompletedTask;
-            var logIn = before.Status == UserStatus.Offline && after.Status == UserStatus.Online;
-            var logOff = before.Status == UserStatus.Online && after.Status == UserStatus.Offline;
+            var logIn = before.Status == Offline && after.Status == Online;
+            var logOff = before.Status == Online && after.Status == Offline;
             UserLog userLog;
             if (logIn) userLog = new UserLog(after, UserAction.LogIn);
             else if (logOff) userLog = new UserLog(after, UserAction.LogOff);
