@@ -19,7 +19,7 @@ namespace Botbin.CommandCenters {
             provider.GetService<Settings>();
         }
 
-        private static string FormatActivities(IEnumerable<IUserEvent> events, string header = "Activities")
+        private static string Activities(IEnumerable<IUserEvent> events, string header = "Activities")
             => events
                 .OrderBy(e => e.Time)
                 .Aggregate(
@@ -28,7 +28,7 @@ namespace Botbin.CommandCenters {
                     , s => $"{s}```"
                 );
 
-        private static string FormatGameHistory(IEnumerable<UserGame> events, string header = "Game History")
+        private static string GameHistory(IEnumerable<UserGame> events, string header = "Game History")
             => events
                 .OrderBy(e => e.Time)
                 .Aggregate(
@@ -48,14 +48,9 @@ namespace Botbin.CommandCenters {
                 .ToList();
 
             if (userGames.Any())
-                await Context.Channel.SendMessageAsync(FormatGameHistory(
-                    userGames,
-                    $"Game History for '{user.Username}'")
-                );
+                await ReplyAsync(GameHistory(userGames, $"Game History for '{user.Username}'"));
             else
-                await Context.Channel.SendMessageAsync(
-                    $"No game history found for user '{user.Username}'"
-                );
+                await ReplyAsync($"No game history found for user '{user.Username}'");
         }
 
         [Command("gamehistory", RunMode = RunMode.Async)]
@@ -68,8 +63,8 @@ namespace Botbin.CommandCenters {
                 .OrderBy(game => game.Time)
                 .ToList();
 
-            if (userGames.Any()) await Context.Channel.SendMessageAsync(FormatGameHistory(userGames));
-            else await Context.Channel.SendMessageAsync("No game history found.");
+            if (userGames.Any()) await ReplyAsync(GameHistory(userGames));
+            else await ReplyAsync("No game history found.");
         }
 
         [Command("activity", RunMode = RunMode.Async)]
@@ -77,8 +72,8 @@ namespace Botbin.CommandCenters {
             var events = _eventRetriever
                 .UserEvents()
                 .ToList();
-            if (events.Any()) await Context.Channel.SendMessageAsync(FormatActivities(events));
-            else await Context.Channel.SendMessageAsync("Could not find any activity.");
+            if (events.Any()) await ReplyAsync(Activities(events));
+            else await ReplyAsync("Could not find any activity.");
         }
 
         [Command("activity", RunMode = RunMode.Async)]
@@ -87,8 +82,8 @@ namespace Botbin.CommandCenters {
                 .UserEventsById(user.Id)
                 .ToList();
             if (events.Any())
-                await Context.Channel.SendMessageAsync(FormatActivities(events, $"Activities for '{user.Username}'"));
-            else await Context.Channel.SendMessageAsync($"Could not find activity for '{user.Username}'.");
+                await ReplyAsync(Activities(events, $"Activities for '{user.Username}'"));
+            else await ReplyAsync($"Could not find activity for '{user.Username}'.");
         }
     }
 }
