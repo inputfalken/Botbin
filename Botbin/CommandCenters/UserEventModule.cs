@@ -13,11 +13,10 @@ using static System.Environment;
 namespace Botbin.CommandCenters {
     public class UserEventModule : ModuleBase<SocketCommandContext> {
         private readonly IUserEventRetriever _eventRetriever;
-        private readonly Settings _settings;
 
         public UserEventModule(IServiceProvider provider) {
             _eventRetriever = provider.GetService<IUserEventRetriever>();
-            _settings = provider.GetService<Settings>();
+            provider.GetService<Settings>();
         }
 
         private static string FormatActivities(IEnumerable<IUserEvent> events, string header = "Activities")
