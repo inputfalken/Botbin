@@ -56,6 +56,7 @@ namespace ConsoleApp {
             await commandService.AddModuleAsync<GiphyModule>();
             await commandService.AddModuleAsync<UserEventModule>();
             await commandService.AddModuleAsync<InfoModule>();
+            await commandService.AddModuleAsync<RandomizerModule>();
         }
 
         private static async Task HandleCommandAsync(SocketMessage messageParam) {
