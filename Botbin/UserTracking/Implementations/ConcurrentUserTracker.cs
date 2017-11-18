@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Botbin.UserTracking.UserEvent;
-using Botbin.UserTracking.UserEvent.Enums;
 using Botbin.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using static Botbin.UserTracking.UserEvent.Enums.UserAction;
 using static Discord.UserStatus;
 
 namespace Botbin.UserTracking.Implementations {
@@ -32,21 +32,8 @@ namespace Botbin.UserTracking.Implementations {
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
             UserLog userLog;
-            if (startGame) userLog = new UserGame(before, UserAction.StartGame, after.Game.Value);
-            else if (quitGame) userLog = new UserGame(after, UserAction.QuitGame, before.Game.Value);
-            else return Task.CompletedTask;
-
-            Save(userLog);
-            return Task.CompletedTask;
-        }
-
-        public Task ListenForLoginsAndLogOuts(IUser before, IUser after) {
-            if (NotHuman(before)) return Task.CompletedTask;
-            var logIn = before.Status == Offline && after.Status == Online;
-            var logOff = before.Status == Online && after.Status == Offline;
-            UserLog userLog;
-            if (logIn) userLog = new UserLog(after, UserAction.LogIn);
-            else if (logOff) userLog = new UserLog(after, UserAction.LogOff);
+            if (startGame) userLog = new UserGame(before, StartGame, after.Game.Value);
+            else if (quitGame) userLog = new UserGame(after, QuitGame, before.Game.Value);
             else return Task.CompletedTask;
 
             Save(userLog);
@@ -58,6 +45,30 @@ namespace Botbin.UserTracking.Implementations {
             if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
             var user = new UserMessage(message);
             Save(user);
+            return Task.CompletedTask;
+        }
+
+        public Task ListenForStatus(IUser before, IUser after) {
+            if (NotHuman(before)) return Task.CompletedTask;
+            // There is probably much more states to take into account for proper tracking. :)
+            // Tracking invis cant be done since argumens `before` and `after` understands it as going online/offline.
+            if (before.Status != AFK && after.Status == AFK)
+                Save(new UserLog(after, AwayFromKeyBoardEnabled));
+            if (before.Status == AFK && after.Status != AFK)
+                Save(new UserLog(after, AwayFromKeyBoardDisabled));
+            if (before.Status != DoNotDisturb && after.Status == DoNotDisturb)
+                Save(new UserLog(after, DoNotDisturbEnabled));
+            if (before.Status == DoNotDisturb && after.Status != DoNotDisturb)
+                Save(new UserLog(after, DoNotDistubDisabled));
+            if (before.Status != Idle && after.Status == Idle)
+                Save(new UserLog(after, IdleEnabled));
+            if (before.Status == Idle && after.Status != Idle)
+                Save(new UserLog(after, IdleDisabled));
+            if (before.Status != Online && after.Status == Online)
+                Save(new UserLog(after, LogIn));
+            if (before.Status != Offline && after.Status == Offline)
+                Save(new UserLog(after, LogOff));
+
             return Task.CompletedTask;
         }
 

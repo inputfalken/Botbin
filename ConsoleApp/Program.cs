@@ -42,7 +42,7 @@ namespace ConsoleApp {
 
             client.Log += Log;
             client.GuildMemberUpdated += listener.ListenForGames;
-            client.GuildMemberUpdated += listener.ListenForLoginsAndLogOuts;
+            client.GuildMemberUpdated += listener.ListenForStatus;
             client.MessageReceived += HandleCommandAsync;
             client.MessageReceived += listener.ListenForMessages;
 

@@ -4,6 +4,12 @@
         QuitGame = 1,
         LogOff = 2,
         LogIn = 3,
-        SendMessage = 4
+        SendMessage = 4,
+        DoNotDisturbEnabled,
+        DoNotDistubDisabled,
+        IdleEnabled,
+        IdleDisabled,
+        AwayFromKeyBoardEnabled,
+        AwayFromKeyBoardDisabled
     }
 }
