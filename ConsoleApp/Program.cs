@@ -9,18 +9,24 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using static System.Environment;
+using static System.EnvironmentVariableTarget;
 
 namespace ConsoleApp {
     internal static class Program {
+        private const ulong AdminId = 318468838058360846;
+        private const string BotToken = "DISCORD_BOT_TOKEN";
+        private const char CommandPrefix = '~';
+        private const string TcpAddress = "LOGSTASH_ADDRESS";
+        private const string GiphyApiKey = "GIPHY_API_KEY";
+
         private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton<ILogger>(p =>
-                new JsonTcpLogger(Environment.GetEnvironmentVariable("LOGSTASH_ADDRESS", EnvironmentVariableTarget.Process), 5000, new ConsoleLogger()))
-            .AddSingleton(p => new GiphyService(Environment.GetEnvironmentVariable("GIPHY_API_KEY", EnvironmentVariableTarget.Process)))
-            .AddSingleton(p =>
-                new Settings('~', Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN", EnvironmentVariableTarget.Process), 318468838058360846)
-            )
+                new JsonTcpLogger(GetEnvironmentVariable(TcpAddress, Process), 5000, new ConsoleLogger()))
+            .AddSingleton(p => new GiphyService(GetEnvironmentVariable(GiphyApiKey, Process)))
+            .AddSingleton(p => new Settings(CommandPrefix, GetEnvironmentVariable(BotToken, Process), AdminId))
             .AddSingleton(p => new ConcurrentUserTracker(p))
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentUserTracker>())
             .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentUserTracker>())
