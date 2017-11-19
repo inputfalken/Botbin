@@ -22,19 +22,19 @@ namespace Botbin.CommandCenters {
 
         private static string Activities(IEnumerable<IUserEvent> events, string header = "Activities")
             => events
-                .OrderBy(e => e.Time)
+                .OrderBy(e => e.Occurrence)
                 .Aggregate(
                     $"__**{header}**__:{NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} at {c.Time}{NewLine}"
+                    (a, c) => $"{a}{c.Username} {c.Action} at {c.Occurrence}{NewLine}"
                     , s => $"{s}```"
                 );
 
         private static string GameHistory(IEnumerable<UserGame> events, string header = "Game History")
             => events
-                .OrderBy(e => e.Time)
+                .OrderBy(e => e.Occurrence)
                 .Aggregate(
                     $"__**{header}**__:{NewLine}```",
-                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Time}{NewLine}"
+                    (a, c) => $"{a}{c.Username} {c.Action} {c.Game} at {c.Occurrence}{NewLine}"
                     , s => $"{s}```"
                 );
 

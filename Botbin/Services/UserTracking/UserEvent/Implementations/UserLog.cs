@@ -9,8 +9,8 @@ using static System.Enum;
 
 namespace Botbin.Services.UserTracking.UserEvent.Implementations {
     internal class UserLog : IUserEvent {
-        internal UserLog(IUser user, DateTime time, UserAction type) {
-            Time = time;
+        internal UserLog(IUser user, DateTime occurrence, UserAction type) {
+            Occurrence = occurrence;
             Action = type;
             Id = user.Id;
             Username = user.Username;
@@ -18,9 +18,9 @@ namespace Botbin.Services.UserTracking.UserEvent.Implementations {
         }
 
         [JsonConstructor]
-        protected UserLog(string action, DateTime time, ulong id, string status, string username) {
+        protected UserLog(string action, DateTime occurrence, ulong id, string status, string username) {
             if (TryParse<UserAction>(action, out var userAction)) Action = userAction;
-            Time = time;
+            Occurrence = occurrence;
             Id = id;
             if (TryParse<UserStatus>(status, out var userStatus)) Status = userStatus;
             Username = username;
@@ -32,8 +32,8 @@ namespace Botbin.Services.UserTracking.UserEvent.Implementations {
         [JsonConverter(typeof(StringEnumConverter))]
         public UserStatus Status { get; }
 
-        [JsonProperty("time")]
-        public DateTime Time { get; }
+        [JsonProperty("occurrence ")]
+        public DateTime Occurrence { get; }
 
         [JsonProperty("action")]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -59,8 +59,8 @@ namespace Botbin.Services.UserTracking.UserEvent.Implementations {
         }
 
         [JsonConstructor]
-        private UserMessage(string action, DateTime time, ulong id,
-            string status, string username, string message, string channel) : base(action, time, id,
+        private UserMessage(string action, DateTime occurrence, ulong id,
+            string status, string username, string message, string channel) : base(action, occurrence, id,
             status,
             username) {
             Message = message;
