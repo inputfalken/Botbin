@@ -5,6 +5,7 @@ using Botbin.Services.UserTracking.UserEvent.Enums;
 using Discord;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using static System.Enum;
 
 namespace Botbin.Services.UserTracking.UserEvent.Implementations {
     internal class UserLog : IUserEvent {
@@ -14,6 +15,15 @@ namespace Botbin.Services.UserTracking.UserEvent.Implementations {
             Id = user.Id;
             Username = user.Username;
             Status = user.Status;
+        }
+
+        [JsonConstructor]
+        protected UserLog(string action, DateTime time, ulong id, string status, string username) {
+            if (TryParse<UserAction>(action, out var userAction)) Action = userAction;
+            Time = time;
+            Id = id;
+            if (TryParse<UserStatus>(status, out var userStatus)) Status = userStatus;
+            Username = username;
         }
 
         public UserLog(IUser user, UserAction type) : this(user, DateTime.Now, type) { }
@@ -48,6 +58,15 @@ namespace Botbin.Services.UserTracking.UserEvent.Implementations {
             Channel = message.Channel.Name;
         }
 
+        [JsonConstructor]
+        private UserMessage(string action, DateTime time, ulong id,
+            string status, string username, string message, string channel) : base(action, time, id,
+            status,
+            username) {
+            Message = message;
+            Channel = channel;
+        }
+
         [JsonProperty("message")]
         public string Message { get; }
 
@@ -57,6 +76,7 @@ namespace Botbin.Services.UserTracking.UserEvent.Implementations {
 
     internal sealed class UserGame : UserLog {
         public UserGame(IUser user, UserAction type, Game game) : base(user, type) => Game = game.Name;
+
 
         [JsonProperty("game")]
         public string Game { get; }

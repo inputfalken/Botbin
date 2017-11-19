@@ -16,23 +16,25 @@ using static System.EnvironmentVariableTarget;
 namespace ConsoleApp {
     internal static class Program {
         private const ulong AdminId = 318468838058360846;
-        private const string BotToken = "DISCORD_BOT_TOKEN";
         private const char CommandPrefix = '~';
-        private const string TcpAddress = "LOGSTASH_ADDRESS";
-        private const string GiphyApiKey = "GIPHY_API_KEY";
-        private const int Port = 5000;
+        private const int LogstashPort = 5000;
+        private const int ElasticPort = 9200;
+
+        private static readonly string TcpIp = GetEnvironmentVariable("LOGSTASH_ADDRESS", Process);
+        private static readonly string GiphyApiKey = GetEnvironmentVariable("GIPHY_API_KEY", Process);
+        private static readonly string BotToken = GetEnvironmentVariable("DISCORD_BOT_TOKEN", Process);
+        private static readonly string ElasticsearchAddress = $"http://{TcpIp}:{ElasticPort}";
 
         private static readonly IServiceProvider Services = new ServiceCollection()
             .AddSingleton(p => new CommandService())
             .AddSingleton(p => new DiscordSocketClient())
             .AddSingleton<IRandomizer>(p => new Randomizer(new Random()))
-            .AddSingleton<ILogger>(p =>
-                new JsonTcpLogger(GetEnvironmentVariable(TcpAddress, Process), Port, new ConsoleLogger()))
-            .AddSingleton<IGifProvider>(p => new Giphy(GetEnvironmentVariable(GiphyApiKey, Process)))
-            .AddSingleton(p => new Settings(CommandPrefix, GetEnvironmentVariable(BotToken, Process), AdminId))
+            .AddSingleton<ILogger>(p => new JsonTcpLogger(TcpIp, LogstashPort, new ConsoleLogger()))
+            .AddSingleton<IGifProvider>(p => new Giphy(GiphyApiKey))
+            .AddSingleton(p => new Settings(CommandPrefix, BotToken, AdminId))
             .AddSingleton(p => new ConcurrentUserTracker(p))
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentUserTracker>())
-            .AddSingleton<IUserEventRetriever>(p => p.GetService<ConcurrentUserTracker>())
+            .AddSingleton<IUserEventRetriever>(p => new Elastic(new Uri(ElasticsearchAddress, UriKind.Absolute)))
             .BuildServiceProvider();
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
