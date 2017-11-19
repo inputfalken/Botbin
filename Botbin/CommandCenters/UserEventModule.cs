@@ -45,7 +45,6 @@ namespace Botbin.CommandCenters {
                 .UserEventsById(user.Id)
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .OrderBy(g => g.Time)
                 .ToList()
                 .SomeWhen(l => l.Any())
                 .Match(l =>
@@ -62,7 +61,6 @@ namespace Botbin.CommandCenters {
                 .UserEvents()
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .OrderBy(g => g.Time)
                 .ToList()
                 .SomeWhen(l => l.Any())
                 .Match(l =>
