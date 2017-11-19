@@ -8,6 +8,7 @@ using Botbin.Services.UserTracking.UserEvent.Implementations;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Optional;
 using static System.Environment;
 
 namespace Botbin.CommandCenters {
@@ -40,50 +41,63 @@ namespace Botbin.CommandCenters {
         [Command("gamehistory", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history of the user.")]
         public async Task GameHistory([Summary("The (optional) user to get info for")] SocketUser user) {
-            var userGames = _eventRetriever
+            var result = _eventRetriever
                 .UserEventsById(user.Id)
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .OrderBy(game => game.Time)
-                .ToList();
-
-            if (userGames.Any())
-                await ReplyAsync(GameHistory(userGames, $"Game History for '{user.Username}'"));
-            else
-                await ReplyAsync($"No game history found for user '{user.Username}'");
+                .OrderBy(g => g.Time)
+                .ToList()
+                .SomeWhen(l => l.Any())
+                .Match(l =>
+                        GameHistory(l, $"Game History for '{user.Username}'"),
+                    () => $"No game history found for user '{user.Username}'"
+                );
+            await ReplyAsync(result);
         }
 
         [Command("gamehistory", RunMode = RunMode.Async)]
         [Summary("Retrieves the  game history for everyone.")]
         public async Task GameHistory() {
-            var userGames = _eventRetriever
+            var result = _eventRetriever
                 .UserEvents()
                 .Where(u => u is UserGame)
                 .Cast<UserGame>()
-                .OrderBy(game => game.Time)
-                .ToList();
+                .OrderBy(g => g.Time)
+                .ToList()
+                .SomeWhen(l => l.Any())
+                .Match(l =>
+                        GameHistory(l),
+                    () => "No game history found."
+                );
 
-            if (userGames.Any()) await ReplyAsync(GameHistory(userGames));
-            else await ReplyAsync("No game history found.");
+            await ReplyAsync(result);
         }
 
         [Command("activity", RunMode = RunMode.Async)]
         public async Task Activity() {
-            var events = _eventRetriever
+            var result = _eventRetriever
                 .UserEvents()
-                .ToList();
-            if (events.Any()) await ReplyAsync(Activities(events));
-            else await ReplyAsync("Could not find any activity.");
+                .ToList()
+                .SomeWhen(l => l.Any())
+                .Match(l =>
+                        Activities(l),
+                    () => "Could not find any activity."
+                );
+            await ReplyAsync(result);
         }
 
         [Command("activity", RunMode = RunMode.Async)]
         public async Task Activity([Summary("The user to get activity info for")] SocketUser user) {
-            var events = _eventRetriever
+            var result = _eventRetriever
                 .UserEventsById(user.Id)
-                .ToList();
-            if (events.Any())
-                await ReplyAsync(Activities(events, $"Activities for '{user.Username}'"));
-            else await ReplyAsync($"Could not find activity for '{user.Username}'.");
+                .ToList()
+                .SomeWhen(l => l.Any())
+                .Match(l =>
+                        Activities(l, $"Activities for '{user.Username}'"),
+                    () => $"Could not find activity for '{user.Username}'."
+                );
+
+            await ReplyAsync(result);
         }
     }
 }
