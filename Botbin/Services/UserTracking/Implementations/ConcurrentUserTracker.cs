@@ -5,10 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Botbin.Services.Interfaces;
 using Botbin.Services.UserTracking.UserEvent;
-using Botbin.Services.UserTracking.UserEvent.Enums;
 using Botbin.Services.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using static Botbin.Services.UserTracking.UserEvent.Enums.UserAction;
+using static Discord.UserStatus;
 
 namespace Botbin.Services.UserTracking.Implementations {
     public class ConcurrentUserTracker : IUserListener, IUserEventRetriever {
@@ -32,8 +33,8 @@ namespace Botbin.Services.UserTracking.Implementations {
             var quitGame = before.Game.HasValue && !after.Game.HasValue;
             var startGame = !before.Game.HasValue && after.Game.HasValue;
             UserLog userLog;
-            if (startGame) userLog = new UserGame(before, UserAction.StartGame, after.Game.Value);
-            else if (quitGame) userLog = new UserGame(after, UserAction.QuitGame, before.Game.Value);
+            if (startGame) userLog = new UserGame(before, StartGame, after.Game.Value);
+            else if (quitGame) userLog = new UserGame(after, QuitGame, before.Game.Value);
             else return Task.CompletedTask;
 
             Save(userLog);
@@ -52,24 +53,20 @@ namespace Botbin.Services.UserTracking.Implementations {
             if (NotHuman(before)) return Task.CompletedTask;
             // There is probably much more states to take into account for proper tracking. :)
             // Tracking invis cant be done since arguments `before` and `after` understands it as going online/offline.
-            if (before.Status != UserStatus.AFK && after.Status == UserStatus.AFK)
-                Save(new UserLog(after, UserAction.AwayFromKeyBoardEnabled));
-            if (before.Status == UserStatus.AFK && after.Status != UserStatus.AFK)
-                Save(new UserLog(after, UserAction.AwayFromKeyBoardDisabled));
-            if (before.Status != UserStatus.DoNotDisturb && after.Status == UserStatus.DoNotDisturb)
-                Save(new UserLog(after, UserAction.DoNotDisturbEnabled));
-            if (before.Status == UserStatus.DoNotDisturb && after.Status != UserStatus.DoNotDisturb)
-                Save(new UserLog(after, UserAction.DoNotDistubDisabled));
-            if (before.Status != UserStatus.Idle && after.Status == UserStatus.Idle)
-                Save(new UserLog(after, UserAction.IdleEnabled));
-            if (before.Status == UserStatus.Idle && after.Status != UserStatus.Idle)
-                Save(new UserLog(after, UserAction.IdleDisabled));
+            if (before.Status != DoNotDisturb && after.Status == DoNotDisturb)
+                Save(new UserLog(after, EnableDoNotDisturbMode));
+            if (before.Status == DoNotDisturb && after.Status != DoNotDisturb)
+                Save(new UserLog(after, DisableDoNotDisturbMode));
+            if (before.Status != Idle && after.Status == Idle)
+                Save(new UserLog(after, EnableIdle));
+            if (before.Status == Idle && after.Status != Idle)
+                Save(new UserLog(after, DisableIdle));
             // Logging on automatically makes you in online state.
-            if (before.Status == UserStatus.Offline && after.Status == UserStatus.Online)
-                Save(new UserLog(after, UserAction.LogIn));
+            if (before.Status == Offline && after.Status == Online)
+                Save(new UserLog(after, LogIn));
             // Just going offline from any state means you logged off.
-            if (before.Status != UserStatus.Offline && after.Status == UserStatus.Offline)
-                Save(new UserLog(after, UserAction.LogOff));
+            if (before.Status != Offline && after.Status == Offline)
+                Save(new UserLog(after, LogOff));
 
             return Task.CompletedTask;
         }
