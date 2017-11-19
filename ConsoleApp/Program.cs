@@ -10,8 +10,10 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using static System.DateTime;
 using static System.Environment;
 using static System.EnvironmentVariableTarget;
+using static System.UriKind;
 
 namespace ConsoleApp {
     internal static class Program {
@@ -34,7 +36,7 @@ namespace ConsoleApp {
             .AddSingleton(p => new Settings(CommandPrefix, BotToken, AdminId))
             .AddSingleton(p => new ConcurrentUserTracker(p))
             .AddSingleton<IUserListener>(p => p.GetService<ConcurrentUserTracker>())
-            .AddSingleton<IUserEventRetriever>(p => new Elastic(new Uri(ElasticsearchAddress, UriKind.Absolute)))
+            .AddSingleton<IUserEventRetriever>(p => new Elastic(new Uri(ElasticsearchAddress, Absolute), Today))
             .BuildServiceProvider();
 
         private static void Main(string[] args) => StartAsync().GetAwaiter().GetResult();
