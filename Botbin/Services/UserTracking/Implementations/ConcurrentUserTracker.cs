@@ -8,6 +8,8 @@ using Botbin.Services.UserTracking.UserEvent;
 using Botbin.Services.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
+using Optional;
+using Optional.Linq;
 using static Botbin.Services.UserTracking.UserEvent.Enums.UserAction;
 using static Discord.UserStatus;
 
@@ -29,23 +31,30 @@ namespace Botbin.Services.UserTracking.Implementations {
         public IEnumerable<IUserEvent> UserEvents() => _dictionary.SelectMany(p => p.Value);
 
         public Task ListenForGames(IUser before, IUser after) {
-            if (NotHuman(before)) return Task.CompletedTask;
-            var quitGame = before.Game.HasValue && !after.Game.HasValue;
-            var startGame = !before.Game.HasValue && after.Game.HasValue;
-            UserLog userLog;
-            if (startGame) userLog = new UserGame(before, StartGame, after.Game.Value);
-            else if (quitGame) userLog = new UserGame(after, QuitGame, before.Game.Value);
-            else return Task.CompletedTask;
+            var state = (before: before, after:after);
+            var startGame = Option.Some((action: StartGame, state: state))
+                .Where(t => !t.state.before.Game.HasValue)
+                .Where(t => t.state.after.Game.HasValue)
+                .Select(t => new UserGame(t.state.after, t.action, t.state.after.Game.Value));
 
-            Save(userLog);
+            var quitGame = Option.Some((action: QuitGame, state: state))
+                .Where(t => t.state.before.Game.HasValue)
+                .Where(t => !t.state.after.Game.HasValue)
+                .Select(t => new UserGame(t.state.after, t.action, t.state.before.Game.Value));
+
+            NotHuman(before)
+                .NoneWhen(b => b)
+                .SelectMany(b => startGame.Else(quitGame))
+                .MatchSome(Save);
+
             return Task.CompletedTask;
         }
 
         public Task ListenForMessages(IMessage message) {
-            var author = message.Author;
-            if (NotHuman(author) || Command(message.Content)) return Task.CompletedTask;
-            var user = new UserMessage(message);
-            Save(user);
+            message.SomeWhen(m => !NotHuman(m.Author))
+                .Where(m => !Command(m.Content))
+                .Select(m => new UserMessage(m))
+                .MatchSome(Save);
             return Task.CompletedTask;
         }
 
