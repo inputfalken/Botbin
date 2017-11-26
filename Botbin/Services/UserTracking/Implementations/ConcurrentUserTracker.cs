@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Botbin.Services.Interfaces;
 using Botbin.Services.UserTracking.UserEvent;
+using Botbin.Services.UserTracking.UserEvent.Enums;
 using Botbin.Services.UserTracking.UserEvent.Implementations;
 using Discord;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,16 +43,15 @@ namespace Botbin.Services.UserTracking.Implementations {
                 .Where(t => !t.state.after.Game.HasValue)
                 .Select(t => new UserGame(t.state.after, t.action, t.state.before.Game.Value));
 
-            NotHuman(before)
-                .NoneWhen(b => b)
-                .SelectMany(b => startGame.Else(quitGame))
-                .MatchSome(Save);
+            var items = new[] {startGame, quitGame}
+                .Select(o => o.Select(u => u as IUserEvent));
 
-            return Task.CompletedTask;
+            return after.SomeWhen(Human)
+                .Match(_ => MatchMany(items), () => Task.CompletedTask);
         }
 
         public Task ListenForMessages(IMessage message) {
-            message.SomeWhen(m => !NotHuman(m.Author))
+            message.SomeWhen(m => Human(m.Author))
                 .Where(m => !Command(m.Content))
                 .Select(m => new UserMessage(m))
                 .MatchSome(Save);
@@ -59,30 +59,42 @@ namespace Botbin.Services.UserTracking.Implementations {
         }
 
         public Task ListenForStatus(IUser before, IUser after) {
-            if (NotHuman(before)) return Task.CompletedTask;
             // There is probably much more states to take into account for proper tracking. :)
             // Tracking invis cant be done since arguments `before` and `after` understands it as going online/offline.
-            if (before.Status != DoNotDisturb && after.Status == DoNotDisturb)
-                Save(new UserLog(after, EnableDoNotDisturbMode));
-            if (before.Status == DoNotDisturb && after.Status != DoNotDisturb)
-                Save(new UserLog(after, DisableDoNotDisturbMode));
-            if (before.Status != Idle && after.Status == Idle)
-                Save(new UserLog(after, EnableIdle));
-            if (before.Status == Idle && after.Status != Idle)
-                Save(new UserLog(after, DisableIdle));
-            // Logging on automatically makes you in online state.
-            if (before.Status == Offline && after.Status == Online)
-                Save(new UserLog(after, LogIn));
-            // Just going offline from any state means you logged off.
-            if (before.Status != Offline && after.Status == Offline)
-                Save(new UserLog(after, LogOff));
+            var doNotDisturb = LostStatus(before, after, DoNotDisturb, DisableDoNotDisturbMode)
+                .Else(() => GainedStatus(before, after, DoNotDisturb, EnableDoNotDisturbMode));
 
-            return Task.CompletedTask;
+            var idle = LostStatus(before, after, Idle, DisableIdle)
+                .Else(() => GainedStatus(before, after, Idle, EnableIdle));
+
+            var logOnOrOff = GainedStatus(before, after, Offline, LogOff)
+                .Else(LostStatus(before, after, Offline, LogIn));
+
+            var items = new[] {doNotDisturb, idle, logOnOrOff}
+                .Select(o => o.Select(t => new UserLog(t.user, t.action) as IUserEvent));
+
+            return after.SomeWhen(Human)
+                .Match(_ => MatchMany(items), () => Task.CompletedTask);
         }
+
+        private Task MatchMany(IEnumerable<Option<IUserEvent>> items) => items.ToAsyncEnumerable()
+            .ForEachAsync(i => i.MatchSome(Save));
+
+        private static Option<(IUser user, UserAction action)> LostStatus(IUser before, IUser after,
+            UserStatus status, UserAction action) => (before: before, after: after)
+            .SomeWhen(s => s.before.Status == status)
+            .Where(s => s.after.Status != status)
+            .Select(s => (user: s.after, action: action));
+
+        private static Option<(IUser user, UserAction action)> GainedStatus(IUser before, IUser after,
+            UserStatus status, UserAction action) => (before: before, after: after)
+            .SomeWhen(s => s.before.Status != status)
+            .Where(s => s.after.Status == status)
+            .Select(s => (user: s.after, action: action));
 
         private bool Command(string message) => message.StartsWith(_settings.CommandPrefix.ToString());
 
-        private static bool NotHuman(IUser user) => user.IsWebhook || user.IsBot;
+        private static bool Human(IUser user) => !user.IsWebhook && !user.IsBot;
 
         private void Save(IUserEvent user) {
             _logger.Log(user);
