@@ -33,15 +33,16 @@ namespace Botbin.Services.UserTracking.Implementations {
 
         public Task ListenForGames(IUser before, IUser after) {
             var state = (before: before, after:after);
-            var startGame = Option.Some((action: StartGame, state: state))
-                .Where(t => !t.state.before.Game.HasValue)
-                .Where(t => t.state.after.Game.HasValue)
-                .Select(t => new UserGame(t.state.after, t.action, t.state.after.Game.Value));
 
-            var quitGame = Option.Some((action: QuitGame, state: state))
-                .Where(t => t.state.before.Game.HasValue)
-                .Where(t => !t.state.after.Game.HasValue)
-                .Select(t => new UserGame(t.state.after, t.action, t.state.before.Game.Value));
+            var startGame = state
+                .NoneWhen(s => s.before.Game.HasValue)
+                .SelectMany(s => s.after.Game.ToOption(), (s, g) => (user: state.after, game: g))
+                .Select(x => new UserGame(x.user, StartGame, x.game));
+
+            var quitGame = state
+                .NoneWhen(s => s.after.Game.HasValue)
+                .SelectMany(s => s.before.Game.ToOption(), (s, g) => (user: state.before, game: g))
+                .Select(x => new UserGame(x.user, QuitGame, x.game));
 
             var items = new[] {startGame, quitGame}
                 .Select(o => o.Select(u => u as IUserEvent));
