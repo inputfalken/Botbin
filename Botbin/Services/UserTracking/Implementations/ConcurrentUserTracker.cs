@@ -47,13 +47,13 @@ namespace Botbin.Services.UserTracking.Implementations {
             var items = new[] {startGame, quitGame}
                 .Select(o => o.Select(u => u as IUserEvent));
 
-            return after.SomeWhen(Human)
-                .Match(_ => MatchMany(items), () => Task.CompletedTask);
+            return Human(after).Match(_ => MatchMany(items), () => Task.CompletedTask);
         }
 
         public Task ListenForMessages(IMessage message) {
-            message.SomeWhen(m => Human(m.Author))
-                .Where(m => !Command(m.Content))
+            Option.Some(message)
+                .SelectMany(m => Human(m.Author), (m, u) => m)
+                .SelectMany(NotCommand)
                 .Select(m => new UserMessage(m))
                 .MatchSome(Save);
             return Task.CompletedTask;
@@ -62,6 +62,7 @@ namespace Botbin.Services.UserTracking.Implementations {
         public Task ListenForStatus(IUser before, IUser after) {
             // There is probably much more states to take into account for proper tracking. :)
             // Tracking invis cant be done since arguments `before` and `after` understands it as going online/offline.
+
             var doNotDisturb = LostStatus(before, after, DoNotDisturb, DisableDoNotDisturbMode)
                 .Else(() => GainedStatus(before, after, DoNotDisturb, EnableDoNotDisturbMode));
 
@@ -74,8 +75,7 @@ namespace Botbin.Services.UserTracking.Implementations {
             var items = new[] {doNotDisturb, idle, logOnOrOff}
                 .Select(o => o.Select(t => new UserLog(t.user, t.action) as IUserEvent));
 
-            return after.SomeWhen(Human)
-                .Match(_ => MatchMany(items), () => Task.CompletedTask);
+            return Human(after).Match(_ => MatchMany(items), () => Task.CompletedTask);
         }
 
         private Task MatchMany(IEnumerable<Option<IUserEvent>> items) => items.ToAsyncEnumerable()
@@ -93,9 +93,10 @@ namespace Botbin.Services.UserTracking.Implementations {
             .Where(s => s.after.Status == status)
             .Select(s => (user: s.after, action: action));
 
-        private bool Command(string message) => message.StartsWith(_settings.CommandPrefix.ToString());
+        private Option<IMessage> NotCommand(IMessage message) =>
+            message.NoneWhen(m => m.Content.StartsWith(_settings.CommandPrefix.ToString()));
 
-        private static bool Human(IUser user) => !user.IsWebhook && !user.IsBot;
+        private static Option<IUser> Human(IUser user) => user.NoneWhen(x => x.IsWebhook || x.IsBot);
 
         private void Save(IUserEvent user) {
             _logger.Log(user);
