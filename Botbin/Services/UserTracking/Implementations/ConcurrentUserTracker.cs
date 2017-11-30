@@ -36,12 +36,12 @@ namespace Botbin.Services.UserTracking.Implementations {
 
             var startGame = state
                 .NoneWhen(s => s.before.Game.HasValue)
-                .SelectMany(s => s.after.Game.ToOption(), (s, g) => (user: state.after, game: g))
+                .SelectMany(s => s.after.Game.ToOption(), (s, g) => (user: s.after, game: g))
                 .Select(x => new UserGame(x.user, StartGame, x.game));
 
             var quitGame = state
                 .NoneWhen(s => s.after.Game.HasValue)
-                .SelectMany(s => s.before.Game.ToOption(), (s, g) => (user: state.before, game: g))
+                .SelectMany(s => s.before.Game.ToOption(), (s, g) => (user: s.before, game: g))
                 .Select(x => new UserGame(x.user, QuitGame, x.game));
 
             var items = new[] {startGame, quitGame}
