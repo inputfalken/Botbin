@@ -82,8 +82,7 @@ namespace ConsoleApp {
             // Execute the command. (result does not indicate a return value, 
             // rather an object stating if the command executed successfully)
             var result = await commands.ExecuteAsync(context, argPos, Services);
-            if (!result.IsSuccess)
-                await context.Channel.SendMessageAsync(result.ErrorReason);
+            if (!result.IsSuccess) await context.Channel.SendMessageAsync("Oops, something went wrong!");
         }
 
         public static Task Log(LogMessage msg) {
